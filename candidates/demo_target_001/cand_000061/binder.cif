@@ -1,0 +1,5 @@
+# Dummy structure for cand_000061
+# pLDDT=56.67, pTM=0.7, ipTM=0.319
+# Sequence: WRQVMVKADICCGSYQDCSF...
+data_cand_000061
+_entry.id cand_000061

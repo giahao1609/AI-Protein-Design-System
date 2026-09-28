@@ -120,6 +120,35 @@ class MetadataStore:
         )
         self.conn.commit()
 
+    def save_candidates_batch(self, candidates: list[Candidate]) -> None:
+        """Bulk insert or update candidates in a single transaction."""
+        if not candidates:
+            return
+        params_list = [
+            (
+                c.candidate_id,
+                c.target_id,
+                c.sequence,
+                c.sequence_hash,
+                c.status.value,
+                c.scientific_status.value,
+                c.generator,
+                c.model_dump_json(),
+            )
+            for c in candidates
+        ]
+        self.conn.executemany(
+            """INSERT INTO candidates
+               (candidate_id, target_id, sequence, sequence_hash, status, scientific_status, generator, data)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+               ON CONFLICT(candidate_id) DO UPDATE SET
+                   status=excluded.status,
+                   scientific_status=excluded.scientific_status,
+                   data=excluded.data""",
+            params_list,
+        )
+        self.conn.commit()
+
     def get_candidate(self, candidate_id: str) -> Optional[Candidate]:
         """Retrieve a candidate by ID."""
         row = self.conn.execute(

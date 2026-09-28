@@ -102,8 +102,20 @@ class Pipeline:
             num_candidates=self.config.generation.num_candidates,
         )
 
-        # --- Stage 1: Generation ---
-        candidates = self._stage_generate(target, run)
+        # --- Stage 1: Generation (or Resume existing candidates) ---
+        if run.candidate_ids:
+            self.log.info(
+                "pipeline_resuming",
+                run_id=run.run_id,
+                existing_candidates=len(run.candidate_ids),
+            )
+            candidates = []
+            for cid in run.candidate_ids:
+                c = self.db.get_candidate(cid)
+                if c:
+                    candidates.append(c)
+        else:
+            candidates = self._stage_generate(target, run)
 
         # --- Stage 2-5: Process each candidate independently ---
         succeeded = 0
@@ -114,26 +126,45 @@ class Pipeline:
             try:
                 # Check if already processed (resume support)
                 existing = self.db.get_candidate(candidate.candidate_id)
-                if existing and is_terminal(existing.status):
+                current_candidate = existing if existing else candidate
+
+                if is_terminal(current_candidate.status):
                     self.log.info(
                         "candidate_skipped",
-                        candidate_id=candidate.candidate_id,
+                        candidate_id=current_candidate.candidate_id,
                         reason="already_terminal",
-                        status=existing.status.value,
+                        status=current_candidate.status.value,
                     )
+                    if current_candidate.status == CandidateStatus.VALID:
+                        succeeded += 1
+                    elif current_candidate.status in (
+                        CandidateStatus.REJECTED,
+                        CandidateStatus.DUPLICATE,
+                        CandidateStatus.INVALID,
+                    ):
+                        rejected += 1
+                    else:
+                        failed += 1
                     continue
 
                 # Stage 2: Structure prediction
-                candidate = self._stage_predict(candidate, target, run)
-                if is_terminal(candidate.status):
-                    failed += 1
+                current_candidate = self._stage_predict(current_candidate, target, run)
+                if is_terminal(current_candidate.status):
+                    if current_candidate.status in (
+                        CandidateStatus.REJECTED,
+                        CandidateStatus.DUPLICATE,
+                        CandidateStatus.INVALID,
+                    ):
+                        rejected += 1
+                    else:
+                        failed += 1
                     continue
 
                 # Stage 3: Validation (sequence, structure, interface, developability, novelty)
-                candidate = self._stage_validate(candidate, run)
-                if candidate.status == CandidateStatus.VALID:
+                current_candidate = self._stage_validate(current_candidate, run)
+                if current_candidate.status == CandidateStatus.VALID:
                     succeeded += 1
-                elif candidate.status in (
+                elif current_candidate.status in (
                     CandidateStatus.REJECTED,
                     CandidateStatus.DUPLICATE,
                     CandidateStatus.INVALID,
@@ -210,7 +241,17 @@ class Pipeline:
             )
         except Exception as e:
             self.log.error("stage_generate_failed", error=str(e))
+            error = ErrorRecord(
+                stage="generation",
+                error_type=type(e).__name__,
+                error_message=str(e),
+                traceback=traceback.format_exc(),
+            )
+            run.mark_failed(error)
+            self.db.save_run(run)
             raise
+
+        seen_hashes: set[str] = set()
 
         # Assign provenance and save each candidate
         for candidate in candidates:
@@ -229,6 +270,17 @@ class Pipeline:
                 reason="generator_output",
                 stage="generation",
             )
+
+            # Check sequence deduplication
+            if candidate.sequence_hash in seen_hashes or self.db.candidate_exists_by_hash(candidate.sequence_hash):
+                candidate.transition(
+                    CandidateStatus.DUPLICATE,
+                    reason="duplicate_sequence_hash",
+                    stage="generation",
+                )
+            else:
+                seen_hashes.add(candidate.sequence_hash)
+
             run.add_candidate(candidate.candidate_id)
 
             # Save artifacts
@@ -243,7 +295,9 @@ class Pipeline:
                 candidate.candidate_id,
                 provenance.model_dump(),
             )
-            self.db.save_candidate(candidate)
+
+        # Batch save candidates to DB
+        self.db.save_candidates_batch(candidates)
 
         self.log.info(
             "stage_generate_completed",

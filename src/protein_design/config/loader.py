@@ -56,6 +56,7 @@ class ValidationConfig(BaseModel):
     interface_contacts: MetricConfig = Field(default_factory=MetricConfig)
     sasa: MetricConfig = Field(default_factory=MetricConfig)
     custom: dict[str, MetricConfig] = Field(default_factory=dict)
+    params: dict[str, Any] = Field(default_factory=dict)
 
 
 class GenerationConfig(BaseModel):

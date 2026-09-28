@@ -112,6 +112,9 @@ class Candidate(BaseModel):
         Every transition is recorded in status_history. This provides
         a complete audit trail of the candidate's lifecycle.
         """
+        from protein_design.core.lifecycle import validate_transition
+        validate_transition(self.status, new_status, self.candidate_id)
+
         transition = StatusTransition(
             from_status=self.status,
             to_status=new_status,

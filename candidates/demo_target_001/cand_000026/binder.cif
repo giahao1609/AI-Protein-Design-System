@@ -1,0 +1,5 @@
+# Dummy structure for cand_000026
+# pLDDT=53.37, pTM=0.798, ipTM=0.88
+# Sequence: YEGDHGKREKKRWPKPSCQK...
+data_cand_000026
+_entry.id cand_000026

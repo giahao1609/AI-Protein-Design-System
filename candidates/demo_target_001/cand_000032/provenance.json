@@ -1,0 +1,16 @@
+{
+  "run_id": "run_d42cd899ac9a",
+  "target_id": "demo_target_001",
+  "generator": "dummy",
+  "generator_version": "1.0.0",
+  "model_checkpoint": null,
+  "git_commit": "33ff0c30b6482260d4ca4ba0c2130def4e5cf252",
+  "config_hash": "212ad941f9260e1c651fcff7ec87f561737fb1f437f68e37d9cda07b86bb4770",
+  "random_seed": 73,
+  "hardware": "Intel64 Family 6 Model 141 Stepping 1, GenuineIntel | GPU: NVIDIA GeForce RTX 3050 Laptop GPU",
+  "timestamp": "2026-09-28 14:34:47.200460+00:00",
+  "input_hashes": {
+    "target_hash": "859f7f02af5cef17c46bb287f0d11ae557b665ce68d54a440e18cb44d87862c7"
+  },
+  "parent_candidate_id": null
+}

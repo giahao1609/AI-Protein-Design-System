@@ -1,0 +1,5 @@
+# Dummy structure for cand_000074
+# pLDDT=90.32, pTM=0.428, ipTM=0.279
+# Sequence: RAIRGARNMLNMHLVNVEMK...
+data_cand_000074
+_entry.id cand_000074
