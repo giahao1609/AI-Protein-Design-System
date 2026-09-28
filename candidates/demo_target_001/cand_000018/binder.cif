@@ -1,0 +1,5 @@
+# Dummy structure for cand_000018
+# pLDDT=60.09, pTM=0.906, ipTM=0.862
+# Sequence: VHDDPNRINGMKSDQVNVKV...
+data_cand_000018
+_entry.id cand_000018

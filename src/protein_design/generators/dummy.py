@@ -43,10 +43,16 @@ class DummyGenerator(BaseGenerator):
             max_length (int): Maximum sequence length (default: 80)
             design_type (str): Design type (default: 'minibinder')
         """
+        params = config.get("params", {}) if isinstance(config.get("params"), dict) else {}
+        if params.get("fail_generation", config.get("fail_generation", False)):
+            from protein_design.core.exceptions import GenerationError
+            raise GenerationError("Simulated generator crash", candidate_id=None)
+
         rng = random.Random(seed)
-        min_length = config.get("min_length", 40)
-        max_length = config.get("max_length", 80)
-        design_type_str = config.get("design_type", "minibinder")
+        min_length = params.get("min_length", config.get("min_length", 40))
+        max_length = params.get("max_length", config.get("max_length", 80))
+        design_type_str = params.get("design_type", config.get("design_type", "minibinder"))
+        duplicate_indices = set(params.get("duplicate_indices", config.get("duplicate_indices", [])))
 
         try:
             design_type = DesignType(design_type_str)
@@ -54,9 +60,17 @@ class DummyGenerator(BaseGenerator):
             design_type = DesignType.OTHER
 
         candidates = []
+        first_sequence = ""
+
         for i in range(num_candidates):
-            length = rng.randint(min_length, max_length)
-            sequence = "".join(rng.choices(AMINO_ACIDS, k=length))
+            if i in duplicate_indices and first_sequence:
+                sequence = first_sequence
+            else:
+                length = rng.randint(min_length, max_length)
+                sequence = "".join(rng.choices(AMINO_ACIDS, k=length))
+                if not first_sequence:
+                    first_sequence = sequence
+
             candidate_seed = seed + i
 
             candidate = Candidate(

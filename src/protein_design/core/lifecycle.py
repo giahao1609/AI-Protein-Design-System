@@ -14,40 +14,52 @@ from protein_design.core.exceptions import CandidateLifecycleError
 VALID_TRANSITIONS: dict[CandidateStatus, set[CandidateStatus]] = {
     CandidateStatus.CREATED: {
         CandidateStatus.GENERATED,
+        CandidateStatus.INVALID,
         CandidateStatus.FAILED,
     },
     CandidateStatus.GENERATED: {
         CandidateStatus.SEQUENCE_VALIDATED,
         CandidateStatus.REJECTED,
+        CandidateStatus.INVALID,
+        CandidateStatus.DUPLICATE,
         CandidateStatus.FAILED,
     },
     CandidateStatus.SEQUENCE_VALIDATED: {
         CandidateStatus.STRUCTURE_PREDICTED,
+        CandidateStatus.REJECTED,
+        CandidateStatus.INVALID,
         CandidateStatus.FAILED,
     },
     CandidateStatus.STRUCTURE_PREDICTED: {
         CandidateStatus.STRUCTURE_CHECKED,
         CandidateStatus.REJECTED,
+        CandidateStatus.INVALID,
         CandidateStatus.FAILED,
     },
     CandidateStatus.STRUCTURE_CHECKED: {
         CandidateStatus.INTERFACE_CHECKED,
         CandidateStatus.REJECTED,
+        CandidateStatus.INVALID,
         CandidateStatus.FAILED,
     },
     CandidateStatus.INTERFACE_CHECKED: {
         CandidateStatus.DEVELOPABILITY_CHECKED,
         CandidateStatus.REJECTED,
+        CandidateStatus.INVALID,
         CandidateStatus.FAILED,
     },
     CandidateStatus.DEVELOPABILITY_CHECKED: {
         CandidateStatus.NOVELTY_CHECKED,
         CandidateStatus.DUPLICATE,
+        CandidateStatus.REJECTED,
+        CandidateStatus.INVALID,
         CandidateStatus.FAILED,
     },
     CandidateStatus.NOVELTY_CHECKED: {
         CandidateStatus.VALID,
         CandidateStatus.REJECTED,
+        CandidateStatus.INVALID,
+        CandidateStatus.DUPLICATE,
         CandidateStatus.FAILED,
     },
     # Terminal states — no further transitions

@@ -176,6 +176,49 @@ def run_demo(
     db.close()
 
 
+@run_app.command("inspect")
+def run_inspect(
+    run_id: str = typer.Argument(..., help="Experiment run ID"),
+):
+    """Show detailed information about an experiment run."""
+    setup_logging()
+    db = _get_db()
+    run = db.get_run(run_id)
+
+    if run is None:
+        console.print(f"[red]Experiment run not found: {run_id}[/red]")
+        db.close()
+        raise typer.Exit(1)
+
+    console.print(f"\n[bold cyan]Experiment Run: {run.run_id}[/bold cyan]\n")
+
+    info_table = Table(show_header=False, box=None)
+    info_table.add_column("Field", style="dim")
+    info_table.add_column("Value")
+    info_table.add_row("Target ID", run.target_id)
+    info_table.add_row("Status", run.status.value)
+    info_table.add_row("Pipeline Version", run.pipeline_version)
+    info_table.add_row("Config Hash", run.config_hash[:16] + "..." if run.config_hash else "N/A")
+    info_table.add_row("Random Seed", str(run.random_seed))
+    info_table.add_row("Started At", str(run.started_at))
+    info_table.add_row("Finished At", str(run.finished_at) if run.finished_at else "N/A")
+    info_table.add_row("Candidate Count", str(len(run.candidate_ids)))
+    console.print(info_table)
+
+    if run.output_summary:
+        console.print(f"\n[bold]Summary:[/bold]")
+        for k, v in run.output_summary.items():
+            console.print(f"  {k}: {v}")
+
+    if run.errors:
+        console.print(f"\n[bold red]Errors ({len(run.errors)}):[/bold red]")
+        for err in run.errors:
+            console.print(f"  [{err.stage}] {err.error_type}: {err.error_message}")
+
+    console.print()
+    db.close()
+
+
 # ---------------------------------------------------------------------------
 # target commands
 # ---------------------------------------------------------------------------

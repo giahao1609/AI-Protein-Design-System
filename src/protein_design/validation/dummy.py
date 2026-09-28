@@ -29,6 +29,15 @@ class DummyValidator(BaseValidator):
         For each metric in config, if threshold is not None,
         compare metric value against threshold.
         """
+        params = config.get("params", {}) if isinstance(config.get("params"), dict) else {}
+        fail_ids = set(params.get("fail_candidate_ids", config.get("fail_candidate_ids", [])))
+        if candidate.candidate_id in fail_ids:
+            from protein_design.core.exceptions import ValidationError
+            raise ValidationError(
+                f"Simulated validator failure for candidate {candidate.candidate_id}",
+                candidate_id=candidate.candidate_id,
+            )
+
         metrics = candidate.metrics
 
         # Structure QC based on pLDDT

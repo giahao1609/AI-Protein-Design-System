@@ -30,6 +30,20 @@ class DummyPredictor(BasePredictor):
 
         Uses candidate seed for deterministic fake scores.
         """
+        params = config.get("params", {}) if isinstance(config.get("params"), dict) else {}
+        fail_ids = set(params.get("fail_candidate_ids", config.get("fail_candidate_ids", [])))
+        timeout_ids = set(params.get("timeout_candidate_ids", config.get("timeout_candidate_ids", [])))
+
+        if candidate.candidate_id in fail_ids:
+            from protein_design.core.exceptions import PredictionError
+            raise PredictionError(
+                f"Simulated predictor failure for candidate {candidate.candidate_id}",
+                candidate_id=candidate.candidate_id,
+            )
+
+        if candidate.candidate_id in timeout_ids:
+            raise TimeoutError(f"Simulated predictor timeout for candidate {candidate.candidate_id}")
+
         rng = random.Random(candidate.seed or 42)
 
         plddt = round(rng.uniform(50.0, 95.0), 2)

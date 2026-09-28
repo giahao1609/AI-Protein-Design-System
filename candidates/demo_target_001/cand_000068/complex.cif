@@ -1,0 +1,4 @@
+# Dummy complex for cand_000068 + demo_target_001
+# ipTM=0.583, pAE=4.33
+data_cand_000068_complex
+_entry.id cand_000068_complex
