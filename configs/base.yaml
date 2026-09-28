@@ -1,0 +1,77 @@
+# Base Pipeline Configuration
+# AI Protein Design System — Changjiang Cup 2026
+#
+# IMPORTANT: No scientific thresholds are set here by default.
+# All thresholds must be established through benchmarking.
+# threshold: null means "compute but do not filter"
+
+project_name: protein-design
+version: "0.1.0"
+
+generation:
+  generator: dummy
+  num_candidates: 10
+  random_seed: 42
+  design_type: minibinder
+  params: {}
+
+prediction:
+  predictor: dummy
+  params: {}
+
+validation:
+  # Structure quality (pLDDT)
+  plddt:
+    enabled: true
+    threshold: null        # Not yet calibrated
+    direction: higher_better
+    weight: null
+
+  # Template modeling score
+  ptm:
+    enabled: true
+    threshold: null        # Not yet calibrated
+    direction: higher_better
+    weight: null
+
+  # Interface predicted TM-score
+  iptm:
+    enabled: true
+    threshold: null        # Not yet calibrated
+    direction: higher_better
+    weight: null
+
+  # Predicted aligned error
+  pae:
+    enabled: true
+    threshold: null        # Not yet calibrated
+    direction: lower_better
+    weight: null
+
+  # Clash score
+  clash_score:
+    enabled: true
+    threshold: null        # Not yet calibrated
+    direction: lower_better
+    weight: null
+
+  # Interface contacts
+  interface_contacts:
+    enabled: true
+    threshold: null        # Not yet calibrated
+    direction: higher_better
+    weight: null
+
+  # Solvent accessible surface area
+  sasa:
+    enabled: true
+    threshold: null        # Not yet calibrated
+    direction: higher_better
+    weight: null
+
+storage:
+  database_path: protein_design.db
+  candidates_dir: candidates
+  experiments_dir: experiments
+  evidence_dir: evidence
+  audit_dir: audit

@@ -1,0 +1,59 @@
+# Competition Rule Registry
+# AI Protein Design System — Changjiang Cup 2026
+#
+# IMPORTANT: All values here must come from OFFICIAL competition documents.
+# DO NOT assume or guess any values.
+# Every field must cite its source document.
+#
+# Fields marked "TBD" have NOT been confirmed from official sources.
+
+competition:
+  name: "Changjiang Cup 2026"
+  organizer: TBD
+  website: TBD
+
+rules:
+  # Protein constraints
+  min_length: TBD           # Source: [official document needed]
+  max_length: TBD           # Source: [official document needed]
+  allowed_amino_acids: TBD  # Source: [official document needed]
+
+  # Submission constraints
+  max_submissions: TBD      # Source: [official document needed]
+  submission_format: TBD    # Source: [official document needed]
+  file_format: TBD          # Source: [official document needed]
+
+  # Allowed approaches
+  allowed_models: TBD       # Source: [official document needed]
+  vhh_allowed: TBD          # Source: [official document needed]
+  minibinder_allowed: TBD   # Source: [official document needed]
+
+  # Scoring
+  scoring_system: TBD       # Source: [official document needed]
+  evaluation_method: TBD    # Source: [official document needed]
+
+  # Timeline
+  registration_deadline: TBD
+  submission_deadline: TBD
+  results_date: TBD
+
+targets:
+  # Official competition targets
+  # Add as they are announced
+  []
+
+# Document registry — track all official documents
+documents:
+  []
+  # Example:
+  # - filename: "rules_v1.pdf"
+  #   date_obtained: "2026-01-01"
+  #   source_url: "https://..."
+  #   hash: ""
+  #   notes: ""
+
+# Version history of this registry
+changelog:
+  - date: "2026-09-28"
+    change: "Initial registry created. All values TBD pending official documents."
+    author: "system"

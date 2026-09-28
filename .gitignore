@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite3
+
+# Large model files
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+
+# Large data artifacts (tracked via DVC or separate mechanism)
+# Uncomment if using DVC:
+# *.pdb
+# *.cif
+
+# Temporary
+tmp/
+temp/
+scratch/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Coverage
+.coverage
+htmlcov/
