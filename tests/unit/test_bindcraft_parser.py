@@ -7,7 +7,6 @@ thresholds (pLDDT > 80) or requiring GPU compute.
 
 from __future__ import annotations
 
-import csv
 import shutil
 from pathlib import Path
 
@@ -34,7 +33,14 @@ def test_target_settings_serialization(tmp_path):
         name="EGFR Ectodomain",
         source="literature",
         sequence=target_seq,
-        chains=[ChainInfo(chain_id="A", sequence=target_seq, length=len(target_seq), description="Target chain")],
+        chains=[
+            ChainInfo(
+                chain_id="A",
+                sequence=target_seq,
+                length=len(target_seq),
+                description="Target chain",
+            )
+        ],
         hotspots=[
             HotspotInfo(chain_id="A", residue=120),
             HotspotInfo(chain_id="A", residue=124),

@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import csv
 import json
-import os
 import shutil
 import subprocess
 import time
@@ -112,7 +111,9 @@ def serialize_target_settings(
     return settings
 
 
-def convert_pdb_to_mmcif(pdb_path: Path, output_cif_path: Path, chain_id: Optional[str] = None) -> Path:
+def convert_pdb_to_mmcif(
+    pdb_path: Path, output_cif_path: Path, chain_id: Optional[str] = None
+) -> Path:
     """Convert a PDB file to mmCIF format using gemmi.
 
     If chain_id is provided, only that chain is written (e.g. for binder-only structure).
@@ -123,19 +124,12 @@ def convert_pdb_to_mmcif(pdb_path: Path, output_cif_path: Path, chain_id: Option
     structure = gemmi.read_structure(str(pdb_path))
 
     if chain_id:
-        # Create a filtered copy with only the target chain
-        filtered = gemmi.Structure()
-        for model in structure:
-            new_model = gemmi.Model(model.name)
-            for chain in model:
-                if chain.name == chain_id:
-                    new_model.add_chain(chain)
-            if len(new_model) > 0:
-                filtered.add_model(new_model)
-        if len(filtered) > 0:
-            doc = filtered.make_mmcif_document()
-        else:
-            doc = structure.make_mmcif_document()
+        structure_copy = structure.clone()
+        for model in structure_copy:
+            chains_to_remove = [c.name for c in model if c.name != chain_id]
+            for c_name in chains_to_remove:
+                model.remove_chain(c_name)
+        doc = structure_copy.make_mmcif_document()
     else:
         doc = structure.make_mmcif_document()
 
@@ -171,12 +165,12 @@ def parse_bindcraft_output(
     if failure_csv.exists():
         try:
             with open(failure_csv, mode="r", encoding="utf-8") as f:
-                reader = csv.reader(f)
-                header = next(reader, None)
-                for row in reader:
-                    if len(row) >= 2:
+                fail_reader = csv.reader(f)
+                next(fail_reader, None)
+                for r_row in fail_reader:
+                    if len(r_row) >= 2:
                         try:
-                            rejection_counts[row[0].strip()] = int(row[1].strip())
+                            rejection_counts[r_row[0].strip()] = int(r_row[1].strip())
                         except ValueError:
                             pass
         except Exception as e:
@@ -219,7 +213,9 @@ def parse_bindcraft_output(
                     try:
                         return float(val)
                     except ValueError:
-                        raise GenerationError(f"Corrupted numeric metric '{key}' with value '{val}'")
+                        raise GenerationError(
+                            f"Corrupted numeric metric '{key}' with value '{val}'"
+                        )
                 return None
 
             def _parse_int(key: str) -> Optional[int]:
@@ -228,7 +224,9 @@ def parse_bindcraft_output(
                     try:
                         return int(float(val))
                     except ValueError:
-                        raise GenerationError(f"Corrupted integer metric '{key}' with value '{val}'")
+                        raise GenerationError(
+                            f"Corrupted integer metric '{key}' with value '{val}'"
+                        )
                 return None
 
             raw_plddt = _parse_float("Average_pLDDT")
@@ -324,7 +322,9 @@ def parse_bindcraft_output(
                 metadata={
                     "design_name": design_name,
                     "model_metrics": model_metrics,
-                    "bindcraft_raw_metrics": {k: v for k, v in row.items() if k not in ("Design", "Sequence")},
+                    "bindcraft_raw_metrics": {
+                        k: v for k, v in row.items() if k not in ("Design", "Sequence")
+                    },
                 },
             )
             candidates.append(candidate)
@@ -477,8 +477,9 @@ class BindCraftGenerator(BaseGenerator):
                 )
             time.sleep(1)
 
-        stdout, stderr = process.communicate()
+        _stdout, stderr = process.communicate()
         if retcode != 0:
             raise GenerationError(
                 f"BindCraft execution failed with exit code {retcode}: {stderr}"
             )
+

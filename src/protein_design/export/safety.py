@@ -53,7 +53,9 @@ def verify_export_safety(
     # COMMON BLOCK 2: Missing or corrupted structure artifacts are unconditionally blocked
     struct_path = candidate.structure_path or candidate.complex_structure_path
     if not struct_path:
-        raise SecurityIntegrityError("Export blocked: Candidate structure coordinate file is missing.")
+        raise SecurityIntegrityError(
+            "Export blocked: Candidate structure coordinate file is missing."
+        )
 
     if not Path(struct_path).exists():
         raise SecurityIntegrityError(
@@ -69,15 +71,18 @@ def verify_export_safety(
             )
         if not candidate.provenance.metadata.get("publication_ready", False):
             raise SecurityIntegrityError(
-                "Export blocked for publication: Candidate not marked publication_ready with verified 9-link provenance."
+                "Export blocked for publication: Candidate not marked publication_ready "
+                "with verified 9-link provenance."
             )
 
     elif purpose == "competition":
-        # Competition gate validates competition submission eligibility and sequence length constraints
-        # It does NOT mandate publication_ready = True, preserving operational flexibility for candidate library delivery
+        # Competition gate validates competition submission eligibility and length constraints.
+        # It does NOT mandate publication_ready = True.
         if len(candidate.sequence) < 20:
             raise SecurityIntegrityError(
-                f"Export blocked for competition: Sequence length ({len(candidate.sequence)}) below minimum threshold of 20."
+                f"Export blocked for competition: Sequence length ({len(candidate.sequence)}) "
+                "below minimum threshold of 20."
             )
 
     return True
+

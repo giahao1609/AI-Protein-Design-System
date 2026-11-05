@@ -27,7 +27,6 @@ from protein_design.schemas import (
     ProvenanceRecord,
     ScientificStatus,
     StatusTransition,
-    Target,
 )
 
 
@@ -174,7 +173,7 @@ def test_export_safety_blocks_dummy_validated(tmp_path, sample_target):
 
 
 def test_export_safety_blocks_missing_structure(sample_target):
-    """Verify verify_export_safety unconditionally blocks candidates with missing structure coordinates."""
+    """Verify verify_export_safety blocks candidates with missing structure coordinates."""
     cand = Candidate(
         candidate_id="cand_nostruct_001",
         target_id=sample_target.target_id,
@@ -189,7 +188,7 @@ def test_export_safety_blocks_missing_structure(sample_target):
 
 
 def test_export_safety_purpose_separation(tmp_path, sample_target):
-    """Verify purpose separation: competition allows valid non-publication designs, publication mandates publication_ready."""
+    """Verify purpose separation: competition allows valid designs, publication mandates ready."""
     real_struct = tmp_path / "valid_binder.cif"
     real_struct.write_text("data_cand\n_entry.id test\n")
 
