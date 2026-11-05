@@ -231,6 +231,7 @@ class ProvenanceRecord(BaseModel):
     timestamp: datetime = Field(default_factory=utc_now)
     input_hashes: dict[str, str] = Field(default_factory=dict)
     parent_candidate_id: Optional[str] = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class HardwareInfo(BaseModel):
