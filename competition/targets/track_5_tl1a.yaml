@@ -1,0 +1,53 @@
+target_id: TL1A
+name: Tumor Necrosis Factor Ligand Superfamily Member 15 (Monomer)
+source: competition
+sequence: LKGQEFAPSHQQVYAPLRADGDKPRAHLTVVRQTPTQHFKNQFPALHWEHELGLAFTKNRMNYTNKFLLIPESGDYFIYSQVTFRGMTSECSEIRQAGRPNKPDSITVVITKVTDSYPEPTQLLMGTKSVCEVGSNWFQPIYLGAMFSLQEGDKLMVNVSDISLVDYTKEDKTFFGAFLL
+structure_source: PDB:2RE9
+chains:
+- chain_id: A
+  sequence: LKGQEFAPSHQQVYAPLRADGDKPRAHLTVVRQTPTQHFKNQFPALHWEHELGLAFTKNRMNYTNKFLLIPESGDYFIYSQVTFRGMTSECSEIRQAGRPNKPDSITVVITKVTDSYPEPTQLLMGTKSVCEVGSNWFQPIYLGAMFSLQEGDKLMVNVSDISLVDYTKEDKTFFGAFLL
+  length: 180
+  description: TL1A target chain
+hotspots:
+- chain_id: A
+  residue: 115
+  importance: 0.9
+- chain_id: A
+  residue: 118
+  importance: 1.0
+- chain_id: A
+  residue: 142
+  importance: 1.0
+- chain_id: A
+  residue: 144
+  importance: 0.9
+- chain_id: A
+  residue: 170
+  importance: 0.8
+- chain_id: A
+  residue: 177
+  importance: 0.9
+- chain_id: A
+  residue: 182
+  importance: 1.0
+notes: TL1A (Leu72-Leu251). Designed for BindCraft de novo minibinder (40-100 aa).
+  Hotspots located on a single monomer (Chain A) at the DR3/DcR3 receptor interaction
+  patch.
+source_references:
+- UniProt:O95150
+- PDB:2RE9
+- Changjiang Cup 2026 Official Rules
+metadata:
+  track_id: 5
+  molecule_type: minibinder
+  min_length: 40
+  max_length: 100
+  uniprot_id: O95150
+  sequence_range: L72 - L251
+  reference_pdb: 2RE9
+  reference_chain: A, B, C
+  special_requirements: null
+  ph_condition: null
+  monomer_isolated_hotspot: true
+  mechanism: inhibitor
+  domain_type: full_mature

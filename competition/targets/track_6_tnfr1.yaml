@@ -1,0 +1,52 @@
+target_id: TNFR1
+name: Tumor Necrosis Factor Receptor Superfamily Member 1A
+source: competition
+sequence: MGLSTVPDLLLPLVLLELLVGIYPSGVIGLVPHLGDREKRDSVCPQGKYIHPQNNSICCTKCHKGTYLYNDCPGPGQDTDCRECESGSFTASENHLRHCLSCSKCRKEMGQVEISSCTVDRDTVCGCRKNQYRHYWSENLFQCFNCSLCLNGTVHLSCQEKQNTVCTCHAGFFLRENECVSCSNCKKSLECTKLCLPQIENVKGTEDSGTT
+structure_source: PDB:9S3I
+chains:
+- chain_id: A
+  sequence: MGLSTVPDLLLPLVLLELLVGIYPSGVIGLVPHLGDREKRDSVCPQGKYIHPQNNSICCTKCHKGTYLYNDCPGPGQDTDCRECESGSFTASENHLRHCLSCSKCRKEMGQVEISSCTVDRDTVCGCRKNQYRHYWSENLFQCFNCSLCLNGTVHLSCQEKQNTVCTCHAGFFLRENECVSCSNCKKSLECTKLCLPQIENVKGTEDSGTT
+  length: 211
+  description: TNFR1 target chain
+hotspots:
+- chain_id: A
+  residue: 32
+  importance: 0.8
+- chain_id: A
+  residue: 34
+  importance: 0.9
+- chain_id: A
+  residue: 66
+  importance: 1.0
+- chain_id: A
+  residue: 75
+  importance: 0.9
+- chain_id: A
+  residue: 112
+  importance: 1.0
+- chain_id: A
+  residue: 114
+  importance: 0.9
+- chain_id: A
+  residue: 116
+  importance: 0.8
+notes: TNFR1 Ectodomain (Met1-Thr211). Targets cysteine-rich domains (CRD1-CRD3) to
+  block ligand TNF-alpha binding.
+source_references:
+- UniProt:P19438-1
+- PDB:9S3I
+- Changjiang Cup 2026 Official Rules
+metadata:
+  track_id: 6
+  molecule_type: VHH
+  min_length: 100
+  max_length: 150
+  uniprot_id: P19438-1
+  sequence_range: M1 - T211
+  reference_pdb: 9S3I
+  reference_chain: A
+  special_requirements: null
+  ph_condition: null
+  monomer_isolated_hotspot: false
+  mechanism: inhibitor
+  domain_type: full_mature

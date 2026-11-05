@@ -1,0 +1,60 @@
+target_id: GLP-1R
+name: Glucagon-Like Peptide 1 Receptor (Extracellular Domain)
+source: competition
+sequence: AGPRPQGATVSLWETVQKWREYRRQCQRSLTEDPPPATDLFCNRTFDEYACWPDGEPGSFVNVSCPWYLPWASSVPQGHVYRFCTAEGLWLQKDNSSLPWRDLSECEESKRGERSSPEE
+structure_source: PDB:6X18
+chains:
+- chain_id: R
+  sequence: AGPRPQGATVSLWETVQKWREYRRQCQRSLTEDPPPATDLFCNRTFDEYACWPDGEPGSFVNVSCPWYLPWASSVPQGHVYRFCTAEGLWLQKDNSSLPWRDLSECEESKRGERSSPEE
+  length: 119
+  description: GLP-1R target chain
+hotspots:
+- chain_id: R
+  residue: 32
+  importance: 0.8
+- chain_id: R
+  residue: 39
+  importance: 0.9
+- chain_id: R
+  residue: 69
+  importance: 1.0
+- chain_id: R
+  residue: 88
+  importance: 0.9
+- chain_id: R
+  residue: 89
+  importance: 1.0
+- chain_id: R
+  residue: 90
+  importance: 0.9
+- chain_id: R
+  residue: 91
+  importance: 1.0
+- chain_id: R
+  residue: 102
+  importance: 0.9
+- chain_id: R
+  residue: 123
+  importance: 0.8
+notes: 'GLP-1R Extracellular Domain (Ala21-Glu139). Biological alert: Sliced range
+  is ECD only (lacks 7TM bundle). Hotspots target the ECD binding groove oriented
+  to avoid steric clash with the 7TM core, promoting receptor activation (agonist
+  mode).'
+source_references:
+- UniProt:P43220
+- PDB:6X18
+- Changjiang Cup 2026 Official Rules
+metadata:
+  track_id: 3
+  molecule_type: VHH
+  min_length: 100
+  max_length: 150
+  uniprot_id: P43220
+  sequence_range: A21 - E139
+  reference_pdb: 6X18
+  reference_chain: R
+  special_requirements: Agonist (receptor activation)
+  ph_condition: null
+  monomer_isolated_hotspot: false
+  mechanism: agonist
+  domain_type: ECD_only

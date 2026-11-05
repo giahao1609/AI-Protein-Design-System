@@ -1,0 +1,56 @@
+target_id: TNF-alpha
+name: Tumor Necrosis Factor Alpha (Monomer)
+source: competition
+sequence: VRSSSRTPSDKPVAHVVANPQAEGQLQWLNRRANALLANGVELRDNQLVVPSEGLYLIYSQVLFKGQGCPSTHVLLTHTISRIAVSYQTKVNLLSAIKSPCQRETPEGAEAKPWYEPIYLGGVFQLEKGDRLSAEINRPDYLDFAESGQVYFGIIAL
+structure_source: PDB:1TNF
+chains:
+- chain_id: A
+  sequence: VRSSSRTPSDKPVAHVVANPQAEGQLQWLNRRANALLANGVELRDNQLVVPSEGLYLIYSQVLFKGQGCPSTHVLLTHTISRIAVSYQTKVNLLSAIKSPCQRETPEGAEAKPWYEPIYLGGVFQLEKGDRLSAEINRPDYLDFAESGQVYFGIIAL
+  length: 157
+  description: TNF-alpha target chain
+hotspots:
+- chain_id: A
+  residue: 87
+  importance: 1.0
+- chain_id: A
+  residue: 97
+  importance: 0.9
+- chain_id: A
+  residue: 103
+  importance: 1.0
+- chain_id: A
+  residue: 104
+  importance: 0.9
+- chain_id: A
+  residue: 107
+  importance: 0.8
+- chain_id: A
+  residue: 143
+  importance: 0.9
+- chain_id: A
+  residue: 144
+  importance: 1.0
+- chain_id: A
+  residue: 145
+  importance: 0.9
+notes: 'TNF-alpha (Val77-Leu233). Critical constraint: Hotspots are located strictly
+  on the surface of a single monomer (Chain A) at the receptor binding interface,
+  avoiding inter-protomer clefts to optimize ESMFold2 monomer+binder ipSAE score.'
+source_references:
+- UniProt:P01375
+- PDB:1TNF
+- Changjiang Cup 2026 Official Rules
+metadata:
+  track_id: 2
+  molecule_type: VHH
+  min_length: 100
+  max_length: 150
+  uniprot_id: P01375
+  sequence_range: V77 - L233
+  reference_pdb: 1TNF
+  reference_chain: A, B, C
+  special_requirements: null
+  ph_condition: null
+  monomer_isolated_hotspot: true
+  mechanism: inhibitor
+  domain_type: full_mature

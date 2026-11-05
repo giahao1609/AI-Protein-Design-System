@@ -34,8 +34,23 @@ def verify_export_safety(
         raise SecurityIntegrityError(f"Export blocked: Unsupported purpose '{purpose}'")
 
     # Sequence integrity check
-    if not candidate.sequence or len(candidate.sequence.strip()) == 0:
+    upper_seq = candidate.sequence.strip().upper()
+    if not upper_seq:
         raise SecurityIntegrityError("Export blocked: Candidate sequence is missing or empty.")
+
+    # PROHIBITED TAGS & LABELS
+    if "HHHHHH" in upper_seq:
+        raise SecurityIntegrityError("Export blocked: Sequence contains His6-tag.")
+    if "DYKDDDDK" in upper_seq:
+        raise SecurityIntegrityError("Export blocked: Sequence contains Flag-tag.")
+    if "EQKLISEEDL" in upper_seq:
+        raise SecurityIntegrityError("Export blocked: Sequence contains Myc-tag.")
+    if "WSHPQFEK" in upper_seq:
+        raise SecurityIntegrityError("Export blocked: Sequence contains Strep-tag.")
+    if upper_seq.startswith("GGGGS") or upper_seq.endswith("GGGGS"):
+        raise SecurityIntegrityError(
+            "Export blocked: Sequence contains redundant terminal GS linker."
+        )
 
     # COMMON BLOCK 1: Dummy-only validation is unconditionally blocked for all exports
     if candidate.generator == "dummy":

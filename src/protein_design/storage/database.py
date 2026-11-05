@@ -327,6 +327,44 @@ class MetadataStore:
         ).fetchall()
         return [DecisionRecord.model_validate_json(row["data"]) for row in rows]
 
+    # -------------------------------------------------------------------
+    # Submission History
+    # -------------------------------------------------------------------
+
+    def save_submission(
+        self,
+        submission_id: str,
+        target_name: str,
+        mode: str,
+        version_tag: str,
+        candidate_ids: list[str],
+        file_path: str,
+        update_note: str,
+    ) -> None:
+        """Record an official competition submission attempt in history."""
+        cand_str = ",".join(candidate_ids)
+        self.conn.execute(
+            """INSERT INTO submission_history
+               (submission_id, target_name, mode, version_tag, candidate_ids, file_path, update_note)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (submission_id, target_name, mode, version_tag, cand_str, file_path, update_note),
+        )
+        self.conn.commit()
+
+    def get_submission_history(self, target_name: Optional[str] = None) -> list[dict[str, Any]]:
+        """Retrieve submission history, optionally filtered by target."""
+        if target_name:
+            rows = self.conn.execute(
+                "SELECT * FROM submission_history WHERE target_name = ? ORDER BY created_at DESC",
+                (target_name,),
+            ).fetchall()
+        else:
+            rows = self.conn.execute(
+                "SELECT * FROM submission_history ORDER BY created_at DESC"
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+
 
 # ---------------------------------------------------------------------------
 # SQL Schema
@@ -379,4 +417,17 @@ CREATE TABLE IF NOT EXISTS decision_records (
     decision TEXT NOT NULL,
     data TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS submission_history (
+    submission_id TEXT PRIMARY KEY,
+    target_name TEXT NOT NULL,
+    mode TEXT NOT NULL,
+    version_tag TEXT NOT NULL,
+    candidate_ids TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    update_note TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_submission_target ON submission_history(target_name);
+
 """

@@ -1,0 +1,55 @@
+target_id: IL-7Ra
+name: Interleukin-7 Receptor Subunit Alpha (Extracellular Domain)
+source: competition
+sequence: MTILGTTFGMVFSLLQVVSGESGYAQNGDLEDAELDDYSFSCYSQLEVNGSQHSLTCAFEDPDVNITNLEFEICGALVEVKCLNFRKLQEIYFIETKKFLLIGKSNICVKVGEKSLTCKKIDLTTIVKPEAPFDLSVVYREGANDFVVTFNTSHLQKKYVKVLMHDVAYRQEKDENKWTHVNLSSTKLTLLQRKLQPAAMYEIKVRSIPDHYFKGFWSEWSPSYYFRTPEINNSSG
+structure_source: PDB:3DI3
+chains:
+- chain_id: B
+  sequence: MTILGTTFGMVFSLLQVVSGESGYAQNGDLEDAELDDYSFSCYSQLEVNGSQHSLTCAFEDPDVNITNLEFEICGALVEVKCLNFRKLQEIYFIETKKFLLIGKSNICVKVGEKSLTCKKIDLTTIVKPEAPFDLSVVYREGANDFVVTFNTSHLQKKYVKVLMHDVAYRQEKDENKWTHVNLSSTKLTLLQRKLQPAAMYEIKVRSIPDHYFKGFWSEWSPSYYFRTPEINNSSG
+  length: 236
+  description: IL-7Ra target chain
+hotspots:
+- chain_id: B
+  residue: 84
+  importance: 0.9
+- chain_id: B
+  residue: 86
+  importance: 1.0
+- chain_id: B
+  residue: 87
+  importance: 0.9
+- chain_id: B
+  residue: 109
+  importance: 0.9
+- chain_id: B
+  residue: 111
+  importance: 1.0
+- chain_id: B
+  residue: 138
+  importance: 0.8
+- chain_id: B
+  residue: 140
+  importance: 0.9
+- chain_id: B
+  residue: 192
+  importance: 1.0
+notes: IL-7Ra Ectodomain (Met1-Gly236). Designed for BindCraft de novo minibinder
+  (40-100 aa). Targets cytokine binding module D1-D2 interface.
+source_references:
+- UniProt:P16871-1
+- PDB:3DI3
+- Changjiang Cup 2026 Official Rules
+metadata:
+  track_id: 7
+  molecule_type: minibinder
+  min_length: 40
+  max_length: 100
+  uniprot_id: P16871-1
+  sequence_range: M1 - G236
+  reference_pdb: 3DI3
+  reference_chain: B
+  special_requirements: null
+  ph_condition: null
+  monomer_isolated_hotspot: false
+  mechanism: inhibitor
+  domain_type: full_mature

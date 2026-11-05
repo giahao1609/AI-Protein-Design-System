@@ -7,7 +7,7 @@ from protein_design.export.submission import (
 )
 
 __all__ = [
-    "verify_export_safety",
     "generate_submission_package",
     "validate_sequence_for_submission",
+    "verify_export_safety",
 ]
