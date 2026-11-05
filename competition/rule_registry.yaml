@@ -1,59 +1,154 @@
 # Competition Rule Registry
 # AI Protein Design System — Changjiang Cup 2026
 #
-# IMPORTANT: All values here must come from OFFICIAL competition documents.
-# DO NOT assume or guess any values.
-# Every field must cite its source document.
-#
-# Fields marked "TBD" have NOT been confirmed from official sources.
+# Source: Official Competition Announcement & Track Specifications (Screenshot 2026-11-05 at 15.56.17)
 
 competition:
   name: "Changjiang Cup 2026"
-  organizer: TBD
-  website: TBD
+  organizer: "Changjiang Cup Organizing Committee"
+  deadline: "2026-11-30T23:59:59"
+  tracks_count: 7
+  max_submissions_per_track: 20
 
 rules:
-  # Protein constraints
-  min_length: TBD           # Source: [official document needed]
-  max_length: TBD           # Source: [official document needed]
-  allowed_amino_acids: TBD  # Source: [official document needed]
+  # Biological requirements
+  de_novo_required: true
+  allowed_amino_acids: "ACDEFGHIKLMNPQRSTVWY" # 20 natural standard amino acids only
+  prohibited_elements:
+    - signal_peptides
+    - purification_tags # e.g. His-tag, Flag-tag
+    - fc_fusions
+    - non_standard_amino_acids
+  mature_protein_only: true
 
-  # Submission constraints
-  max_submissions: TBD      # Source: [official document needed]
-  submission_format: TBD    # Source: [official document needed]
-  file_format: TBD          # Source: [official document needed]
+  # Molecule type constraints
+  molecule_types:
+    minibinder:
+      description: "Single polypeptide chain, single binding module"
+      min_length: 40
+      max_length: 100
+      tracks: [5, 7]
+    vhh:
+      description: "Single domain antibody with full framework and CDRs"
+      min_length: 100
+      max_length: 150
+      tracks: [1, 2, 3, 4, 6]
 
-  # Allowed approaches
-  allowed_models: TBD       # Source: [official document needed]
-  vhh_allowed: TBD          # Source: [official document needed]
-  minibinder_allowed: TBD   # Source: [official document needed]
+  # Deduplication & Priority Rules
+  deduplication:
+    coverage_threshold: 0.90
+    identity_threshold: 1.00 # 100% identity
+    vhh_region_scope: "CDR"  # For VHH, only CDR regions are compared
+    priority_rule: "first_valid_submission_wins"
 
-  # Scoring
-  scoring_system: TBD       # Source: [official document needed]
-  evaluation_method: TBD    # Source: [official document needed]
+  # Evaluation & Scoring
+  screening:
+    in_silico:
+      method: "ESMFold2 + ipSAE"
+      top_k_selection: 1000 # Top 1,000 sequences per track advance to wet-lab
+      params:
+        seeds: 1
+        samples: 1
+        use_template: false
+        target_msa: true
+        design_msa: false
+    wet_lab:
+      primary_metric: "Kd" # Dissociation constant (smaller = stronger = higher rank)
+      award_rule: "top_1_best_design_per_team"
+      extra_assays:
+        eligible_top_k: 50
+        assays: ["druggability", "cell_activity"]
+        bonus_prize: "5000 RMB per criterion if in Top 6"
 
-  # Timeline
-  registration_deadline: TBD
-  submission_deadline: TBD
-  results_date: TBD
+  # Submission Package Format
+  submission_package:
+    file_formats: ["csv", "xlsx", "xls"]
+    max_file_size_mb: 10
+    file_naming_convention: "{Target}_submission.csv" # e.g. EGFR_submission.csv, TL1A_submission.csv
+    header: ["name", "sequence"]
+    max_rows: 21 # 1 header + max 20 candidate rows
+    case_sensitive_check: true
+    no_whitespace: true
 
-targets:
-  # Official competition targets
-  # Add as they are announced
-  []
+tracks:
+  - track_id: 1
+    target: "EGFR"
+    molecule_type: "VHH"
+    min_length: 100
+    max_length: 150
+    uniprot_id: "P00533-1"
+    sequence_range: "Met1 - Ser645"
+    reference_pdb: "6ARU"
+    reference_chain: "A"
+    special_requirements: "Measure affinity at acidic pH = 6.0"
 
-# Document registry — track all official documents
-documents:
-  []
-  # Example:
-  # - filename: "rules_v1.pdf"
-  #   date_obtained: "2026-01-01"
-  #   source_url: "https://..."
-  #   hash: ""
-  #   notes: ""
+  - track_id: 2
+    target: "TNF-α"
+    molecule_type: "VHH"
+    min_length: 100
+    max_length: 150
+    uniprot_id: "P01375"
+    sequence_range: "Val77 - Leu233"
+    reference_pdb: "1TNF"
+    reference_chain: "A, B, C"
+    special_requirements: null
 
-# Version history of this registry
+  - track_id: 3
+    target: "GLP-1R"
+    molecule_type: "VHH"
+    min_length: 100
+    max_length: 150
+    uniprot_id: "P43220"
+    sequence_range: "Ala21 - Glu139"
+    reference_pdb: "6X18"
+    reference_chain: "R"
+    special_requirements: "Agonist (receptor activation)"
+
+  - track_id: 4
+    target: "TfR1"
+    molecule_type: "VHH"
+    min_length: 100
+    max_length: 150
+    uniprot_id: "P02786"
+    sequence_range: "Cys89 - Phe760"
+    reference_pdb: "11QC"
+    reference_chain: "A, B"
+    special_requirements: null
+
+  - track_id: 5
+    target: "TL1A"
+    molecule_type: "minibinder"
+    min_length: 40
+    max_length: 100
+    uniprot_id: "O95150"
+    sequence_range: "Leu72 - Leu251"
+    reference_pdb: "2RE9"
+    reference_chain: "A, B, C"
+    special_requirements: null
+
+  - track_id: 6
+    target: "TNFR1"
+    molecule_type: "VHH"
+    min_length: 100
+    max_length: 150
+    uniprot_id: "P19438-1"
+    sequence_range: "Met1 - Thr211"
+    reference_pdb: "9S3I"
+    reference_chain: "A"
+    special_requirements: null
+
+  - track_id: 7
+    target: "IL-7Rα"
+    molecule_type: "minibinder"
+    min_length: 40
+    max_length: 100
+    uniprot_id: "P16871-1"
+    sequence_range: "Met1 - Gly236"
+    reference_pdb: "3DI3"
+    reference_chain: "B"
+    special_requirements: null
+
 changelog:
-  - date: "2026-09-28"
-    change: "Initial registry created. All values TBD pending official documents."
-    author: "system"
+  - date: "2026-11-05"
+    change: "Updated official rules, 7 tracks parameters, ESMFold2/ipSAE evaluation, submission CSV specifications from official announcement."
+    author: "Houhou (Tech Lead)"
