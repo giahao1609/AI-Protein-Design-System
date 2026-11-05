@@ -73,4 +73,3 @@ class BaseGenerator(ABC):
         Override in subclasses to add validation.
         Raises ConfigError if invalid.
         """
-        pass

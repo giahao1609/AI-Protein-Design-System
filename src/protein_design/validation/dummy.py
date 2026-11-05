@@ -6,10 +6,10 @@ always passes (metric computed but not filtered).
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
-from protein_design.validation.base import BaseValidator, ValidationResult
 from protein_design.schemas import Candidate, QCResult
+from protein_design.validation.base import BaseValidator, ValidationResult
 
 
 class DummyValidator(BaseValidator):

@@ -9,15 +9,15 @@ Verifies system stability with 1,000 dummy candidates:
 """
 
 import time
-import pytest
+
 from protein_design.config.loader import PipelineConfig
 from protein_design.core.pipeline import Pipeline
 from protein_design.generators.dummy import DummyGenerator
 from protein_design.predictors.dummy import DummyPredictor
-from protein_design.validation.dummy import DummyValidator
-from protein_design.schemas import Target, CandidateStatus
+from protein_design.schemas import Target
 from protein_design.storage.artifacts import ArtifactStore
 from protein_design.storage.database import MetadataStore
+from protein_design.validation.dummy import DummyValidator
 
 
 def test_mass_1000_candidates(tmp_path):
@@ -55,6 +55,7 @@ def test_mass_1000_candidates(tmp_path):
     start_time = time.time()
     run = pipeline.run(target)
     elapsed = time.time() - start_time
+    assert elapsed > 0
 
     assert run.status.value == "COMPLETED"
     assert len(run.candidate_ids) == 1000

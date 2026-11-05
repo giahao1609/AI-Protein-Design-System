@@ -21,7 +21,6 @@ from protein_design.generators.bindcraft import (
 from protein_design.schemas import CandidateStatus, ScientificStatus, Target
 from protein_design.schemas.common import ChainInfo, HotspotInfo
 
-
 FIXTURES_DIR = Path("tests/fixtures/bindcraft_output")
 
 

@@ -2,16 +2,12 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
-import pytest
-
 from protein_design.config.loader import (
     PipelineConfig,
     load_config,
+    load_yaml,
     merge_configs,
     save_config,
-    load_yaml,
 )
 
 

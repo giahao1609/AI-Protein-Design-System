@@ -9,11 +9,11 @@ Design rationale:
 
 from __future__ import annotations
 
-import json
 import sqlite3
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
+from protein_design.logging import get_logger
 from protein_design.schemas import (
     Candidate,
     DecisionRecord,
@@ -21,7 +21,6 @@ from protein_design.schemas import (
     ExperimentRun,
     Target,
 )
-from protein_design.logging import get_logger
 
 log = get_logger(module="storage.database")
 
@@ -36,7 +35,7 @@ class MetadataStore:
     def __init__(self, db_path: str | Path):
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
 
     @property
     def conn(self) -> sqlite3.Connection:
@@ -78,7 +77,7 @@ class MetadataStore:
         self.conn.commit()
         log.info("target_saved", target_id=target.target_id, name=target.name)
 
-    def get_target(self, target_id: str) -> Optional[Target]:
+    def get_target(self, target_id: str) -> Target | None:
         """Retrieve a target by ID."""
         row = self.conn.execute(
             "SELECT data FROM targets WHERE target_id = ?", (target_id,)
@@ -149,7 +148,7 @@ class MetadataStore:
         )
         self.conn.commit()
 
-    def get_candidate(self, candidate_id: str) -> Optional[Candidate]:
+    def get_candidate(self, candidate_id: str) -> Candidate | None:
         """Retrieve a candidate by ID."""
         row = self.conn.execute(
             "SELECT data FROM candidates WHERE candidate_id = ?", (candidate_id,)
@@ -160,9 +159,9 @@ class MetadataStore:
 
     def list_candidates(
         self,
-        target_id: Optional[str] = None,
-        status: Optional[str] = None,
-        generator: Optional[str] = None,
+        target_id: str | None = None,
+        status: str | None = None,
+        generator: str | None = None,
         limit: int = 100,
         offset: int = 0,
     ) -> list[Candidate]:
@@ -188,8 +187,8 @@ class MetadataStore:
 
     def count_candidates(
         self,
-        target_id: Optional[str] = None,
-        status: Optional[str] = None,
+        target_id: str | None = None,
+        status: str | None = None,
     ) -> int:
         """Count candidates with optional filters."""
         query = "SELECT COUNT(*) as cnt FROM candidates WHERE 1=1"
@@ -230,7 +229,7 @@ class MetadataStore:
         )
         self.conn.commit()
 
-    def get_run(self, run_id: str) -> Optional[ExperimentRun]:
+    def get_run(self, run_id: str) -> ExperimentRun | None:
         """Retrieve a run by ID."""
         row = self.conn.execute(
             "SELECT data FROM experiment_runs WHERE run_id = ?", (run_id,)
@@ -241,8 +240,8 @@ class MetadataStore:
 
     def list_runs(
         self,
-        target_id: Optional[str] = None,
-        status: Optional[str] = None,
+        target_id: str | None = None,
+        status: str | None = None,
     ) -> list[ExperimentRun]:
         """List experiment runs."""
         query = "SELECT data FROM experiment_runs WHERE 1=1"
@@ -275,7 +274,7 @@ class MetadataStore:
         )
         self.conn.commit()
 
-    def get_evidence(self, evidence_id: str) -> Optional[EvidenceRecord]:
+    def get_evidence(self, evidence_id: str) -> EvidenceRecord | None:
         """Retrieve an evidence record by ID."""
         row = self.conn.execute(
             "SELECT data FROM evidence_records WHERE evidence_id = ?", (evidence_id,)
@@ -284,7 +283,7 @@ class MetadataStore:
             return None
         return EvidenceRecord.model_validate_json(row["data"])
 
-    def list_evidence(self, claim: Optional[str] = None) -> list[EvidenceRecord]:
+    def list_evidence(self, claim: str | None = None) -> list[EvidenceRecord]:
         """List evidence records."""
         if claim:
             rows = self.conn.execute(
@@ -311,7 +310,7 @@ class MetadataStore:
         )
         self.conn.commit()
 
-    def get_decision(self, decision_id: str) -> Optional[DecisionRecord]:
+    def get_decision(self, decision_id: str) -> DecisionRecord | None:
         """Retrieve a decision record by ID."""
         row = self.conn.execute(
             "SELECT data FROM decision_records WHERE decision_id = ?", (decision_id,)
@@ -351,7 +350,7 @@ class MetadataStore:
         )
         self.conn.commit()
 
-    def get_submission_history(self, target_name: Optional[str] = None) -> list[dict[str, Any]]:
+    def get_submission_history(self, target_name: str | None = None) -> list[dict[str, Any]]:
         """Retrieve submission history, optionally filtered by target."""
         if target_name:
             rows = self.conn.execute(

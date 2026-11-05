@@ -16,22 +16,20 @@ import os
 import platform
 import subprocess
 import sys
-from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
+from protein_design.logging import get_logger
 from protein_design.schemas.common import (
     HardwareInfo,
     ProvenanceRecord,
     hash_dict,
-    hash_string,
     utc_now,
 )
-from protein_design.logging import get_logger
 
 log = get_logger(module="provenance")
 
 
-def get_git_commit() -> Optional[str]:
+def get_git_commit() -> str | None:
     """Get the current git commit hash, if in a git repo."""
     try:
         result = subprocess.run(
@@ -84,10 +82,10 @@ def create_provenance(
     generator: str,
     generator_version: str,
     config: dict[str, Any],
-    random_seed: Optional[int] = None,
-    model_checkpoint: Optional[str] = None,
-    parent_candidate_id: Optional[str] = None,
-    input_data: Optional[dict[str, str]] = None,
+    random_seed: int | None = None,
+    model_checkpoint: str | None = None,
+    parent_candidate_id: str | None = None,
+    input_data: dict[str, str] | None = None,
 ) -> ProvenanceRecord:
     """Create a full provenance record.
 

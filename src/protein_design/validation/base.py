@@ -13,7 +13,7 @@ Future implementations:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -22,11 +22,11 @@ from protein_design.schemas import Candidate, QCResult
 
 class ValidationResult(BaseModel):
     """Aggregate result from all validation checks."""
-    sequence_qc: Optional[QCResult] = None
-    structure_qc: Optional[QCResult] = None
-    interface_qc: Optional[QCResult] = None
-    developability_qc: Optional[QCResult] = None
-    novelty_qc: Optional[QCResult] = None
+    sequence_qc: QCResult | None = None
+    structure_qc: QCResult | None = None
+    interface_qc: QCResult | None = None
+    developability_qc: QCResult | None = None
+    novelty_qc: QCResult | None = None
     overall_passed: bool = True
     details: dict[str, Any] = Field(default_factory=dict)
 

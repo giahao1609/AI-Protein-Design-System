@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import pytest
-
-from protein_design.schemas.common import hash_string, hash_dict, hash_file
 from protein_design.provenance.tracker import create_provenance, get_hardware_info
+from protein_design.schemas.common import hash_dict, hash_file, hash_string
 
 
 class TestHashing:

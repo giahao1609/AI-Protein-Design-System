@@ -4,15 +4,14 @@ Verifies that running the pipeline twice with identical target, config,
 and random seed produces deterministic results.
 """
 
-import pytest
 from protein_design.config.loader import PipelineConfig
 from protein_design.core.pipeline import Pipeline
 from protein_design.generators.dummy import DummyGenerator
 from protein_design.predictors.dummy import DummyPredictor
-from protein_design.validation.dummy import DummyValidator
 from protein_design.schemas import Target
 from protein_design.storage.artifacts import ArtifactStore
 from protein_design.storage.database import MetadataStore
+from protein_design.validation.dummy import DummyValidator
 
 
 def test_deterministic_pipeline_execution(tmp_path):
@@ -64,6 +63,7 @@ def test_deterministic_pipeline_execution(tmp_path):
     cands2 = db2.list_candidates(target_id="tgt_repro_001")
 
     # Verify identical sequences, metrics, and statuses
+    assert run1.status == run2.status
     assert len(cands1) == len(cands2) == 5
     for c1, c2 in zip(cands1, cands2):
         assert c1.sequence == c2.sequence

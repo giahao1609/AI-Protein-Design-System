@@ -6,9 +6,8 @@ Every transition is recorded — invalid transitions raise CandidateLifecycleErr
 
 from __future__ import annotations
 
-from protein_design.schemas.common import CandidateStatus
 from protein_design.core.exceptions import CandidateLifecycleError
-
+from protein_design.schemas.common import CandidateStatus
 
 # Valid transitions: from_status → set of allowed to_statuses
 VALID_TRANSITIONS: dict[CandidateStatus, set[CandidateStatus]] = {

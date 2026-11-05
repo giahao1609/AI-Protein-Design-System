@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -34,16 +34,16 @@ class Target(BaseModel):
         description="Origin of target info (e.g., 'PDB', 'competition', 'literature')"
     )
     sequence: str = Field(description="Full amino acid sequence")
-    structure_file: Optional[Path] = Field(
+    structure_file: Path | None = Field(
         default=None, description="Path to structure file (PDB/CIF)"
     )
-    structure_source: Optional[str] = Field(
+    structure_source: str | None = Field(
         default=None, description="Source of structure (e.g., 'PDB:7XYZ', 'AlphaFold')"
     )
 
     # Chain information
     chains: list[ChainInfo] = Field(default_factory=list)
-    residue_numbering: Optional[str] = Field(
+    residue_numbering: str | None = Field(
         default=None, description="Numbering scheme (e.g., 'author', 'PDB', 'UniProt')"
     )
 
@@ -73,7 +73,7 @@ class Target(BaseModel):
     )
 
     @model_validator(mode="after")
-    def compute_hash(self) -> "Target":
+    def compute_hash(self) -> Target:
         """Compute target_hash from sequence and structure if not already set."""
         if not self.target_hash:
             hash_input = self.sequence

@@ -5,22 +5,18 @@ from __future__ import annotations
 
 class ProteinDesignError(Exception):
     """Base exception for all protein design errors."""
-    pass
 
 
 class ConfigError(ProteinDesignError):
     """Error in configuration loading or validation."""
-    pass
 
 
 class SchemaValidationError(ProteinDesignError):
     """Error in data schema validation."""
-    pass
 
 
 class StorageError(ProteinDesignError):
     """Error in storage operations."""
-    pass
 
 
 class GenerationError(ProteinDesignError):
@@ -49,7 +45,6 @@ class ValidationError(ProteinDesignError):
 
 class PipelineError(ProteinDesignError):
     """Error in pipeline orchestration."""
-    pass
 
 
 class CandidateLifecycleError(ProteinDesignError):
@@ -66,4 +61,3 @@ class CandidateLifecycleError(ProteinDesignError):
 
 class SecurityIntegrityError(ProteinDesignError):
     """Error raised when export safety or scientific provenance gates fail."""
-    pass

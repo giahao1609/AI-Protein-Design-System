@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -37,10 +36,10 @@ class EvidenceRecord(BaseModel):
     source: str = Field(description="Human-readable source description")
 
     # Identifiers
-    doi: Optional[str] = None
-    pdb_id: Optional[str] = None
-    uniprot_id: Optional[str] = None
-    url: Optional[str] = None
+    doi: str | None = None
+    pdb_id: str | None = None
+    uniprot_id: str | None = None
+    url: str | None = None
 
     # Metadata
     date_accessed: datetime = Field(default_factory=utc_now)

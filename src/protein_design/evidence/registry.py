@@ -6,11 +6,9 @@ AI reasoning is ranked LAST in the evidence hierarchy.
 
 from __future__ import annotations
 
-from typing import Optional
-
-from protein_design.schemas import DecisionRecord, EvidenceLevel, EvidenceRecord
-from protein_design.storage.database import MetadataStore
 from protein_design.logging import get_logger
+from protein_design.schemas import DecisionRecord, EvidenceRecord
+from protein_design.storage.database import MetadataStore
 
 log = get_logger(module="evidence.registry")
 
@@ -50,7 +48,7 @@ class EvidenceRegistry:
         """Get all decisions in chronological order."""
         return self.db.list_decisions()
 
-    def get_latest_decision(self, question: str) -> Optional[DecisionRecord]:
+    def get_latest_decision(self, question: str) -> DecisionRecord | None:
         """Get the latest decision for a question.
 
         Looks for the most recent decision that hasn't been superseded.

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from protein_design.schemas.common import CandidateStatus
-from protein_design.core.lifecycle import validate_transition, is_terminal
 from protein_design.core.exceptions import CandidateLifecycleError
+from protein_design.core.lifecycle import is_terminal, validate_transition
+from protein_design.schemas.common import CandidateStatus
 
 
 class TestLifecycle:

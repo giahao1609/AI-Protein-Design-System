@@ -8,7 +8,6 @@ from protein_design.schemas import (
     Candidate,
     CandidateStatus,
     DecisionRecord,
-    DesignType,
     EvidenceLevel,
     EvidenceRecord,
     ExperimentRun,
@@ -16,12 +15,10 @@ from protein_design.schemas import (
     Target,
 )
 from protein_design.schemas.common import (
-    QCResult,
-    StatusTransition,
     generate_id,
     generate_sequential_id,
-    hash_string,
     hash_dict,
+    hash_string,
 )
 
 

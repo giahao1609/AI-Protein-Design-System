@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -49,31 +49,31 @@ class Candidate(BaseModel):
     design_type: DesignType = DesignType.MINIBINDER
     generator: str = ""
     generator_version: str = ""
-    seed: Optional[int] = None
+    seed: int | None = None
 
     # Lineage
-    parent_candidate: Optional[str] = Field(
+    parent_candidate: str | None = Field(
         default=None, description="Parent candidate_id if this is a derivative design"
     )
 
     # Structure paths
-    structure_path: Optional[Path] = Field(
+    structure_path: Path | None = Field(
         default=None, description="Path to predicted binder structure"
     )
-    complex_structure_path: Optional[Path] = Field(
+    complex_structure_path: Path | None = Field(
         default=None, description="Path to predicted binder-target complex structure"
     )
 
     # Metrics & QC (populated during pipeline stages)
     metrics: dict[str, Any] = Field(default_factory=dict)
-    sequence_qc: Optional[QCResult] = None
-    structure_qc: Optional[QCResult] = None
-    interface_qc: Optional[QCResult] = None
-    developability: Optional[dict[str, Any]] = None
-    novelty: Optional[NoveltyResult] = None
+    sequence_qc: QCResult | None = None
+    structure_qc: QCResult | None = None
+    interface_qc: QCResult | None = None
+    developability: dict[str, Any] | None = None
+    novelty: NoveltyResult | None = None
 
     # Diversity
-    diversity_cluster: Optional[DiversityInfo] = None
+    diversity_cluster: DiversityInfo | None = None
 
     # Metadata & Custom Attributes
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -87,13 +87,13 @@ class Candidate(BaseModel):
     created_at: datetime = Field(default_factory=utc_now)
 
     # Provenance
-    provenance: Optional[ProvenanceRecord] = None
+    provenance: ProvenanceRecord | None = None
 
     # Computed hash
     sequence_hash: str = Field(default="")
 
     @model_validator(mode="after")
-    def auto_populate(self) -> "Candidate":
+    def auto_populate(self) -> Candidate:
         """Auto-compute length and sequence_hash."""
         if self.length == 0:
             self.length = len(self.sequence)
@@ -106,9 +106,9 @@ class Candidate(BaseModel):
         new_status: CandidateStatus,
         reason: str,
         stage: str,
-        metric_name: Optional[str] = None,
-        metric_value: Optional[float] = None,
-        threshold: Optional[float] = None,
+        metric_name: str | None = None,
+        metric_value: float | None = None,
+        threshold: float | None = None,
     ) -> None:
         """Transition candidate to a new status, recording the change.
 

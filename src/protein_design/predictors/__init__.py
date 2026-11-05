@@ -9,8 +9,8 @@ from protein_design.predictors.esmfold_ipsae import (
 
 __all__ = [
     "BasePredictor",
-    "PredictionResult",
     "DummyPredictor",
     "ESMFold2_ipSAE_Scorer",
+    "PredictionResult",
     "compute_ipsae_score",
 ]

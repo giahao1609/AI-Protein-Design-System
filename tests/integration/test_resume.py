@@ -6,15 +6,14 @@ Verifies that:
 - Resumed run reuses existing candidate IDs rather than generating new ones
 """
 
-import pytest
 from protein_design.config.loader import PipelineConfig
 from protein_design.core.pipeline import Pipeline
 from protein_design.generators.dummy import DummyGenerator
 from protein_design.predictors.dummy import DummyPredictor
-from protein_design.validation.dummy import DummyValidator
-from protein_design.schemas import Target, CandidateStatus, RunStatus, ExperimentRun
+from protein_design.schemas import CandidateStatus, RunStatus, Target
 from protein_design.storage.artifacts import ArtifactStore
 from protein_design.storage.database import MetadataStore
+from protein_design.validation.dummy import DummyValidator
 
 
 def test_interrupted_run_resume(tmp_path):

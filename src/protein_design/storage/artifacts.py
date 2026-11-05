@@ -18,9 +18,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-from protein_design.schemas import Candidate, Target
 from protein_design.logging import get_logger
 
 log = get_logger(module="storage.artifacts")

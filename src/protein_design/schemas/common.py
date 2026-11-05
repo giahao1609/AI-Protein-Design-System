@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import hashlib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
-
 
 # ---------------------------------------------------------------------------
 # ID generation
@@ -60,7 +59,7 @@ def hash_dict(d: dict) -> str:
 
 def utc_now() -> datetime:
     """Current UTC datetime."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 # ---------------------------------------------------------------------------
@@ -141,7 +140,7 @@ class ChainInfo(BaseModel):
     chain_id: str
     sequence: str
     length: int
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class DomainInfo(BaseModel):
@@ -149,23 +148,23 @@ class DomainInfo(BaseModel):
     name: str
     start: int
     end: int
-    source: Optional[str] = None  # e.g., Pfam ID
+    source: str | None = None  # e.g., Pfam ID
 
 
 class InterfaceInfo(BaseModel):
     """Known interface region."""
     name: str
     residues: list[int]
-    partner: Optional[str] = None
-    source: Optional[str] = None
+    partner: str | None = None
+    source: str | None = None
 
 
 class HotspotInfo(BaseModel):
     """Binding hotspot residue."""
     residue: int
     chain_id: str
-    importance: Optional[float] = None
-    source: Optional[str] = None
+    importance: float | None = None
+    source: str | None = None
 
 
 class EpitopeInfo(BaseModel):
@@ -173,16 +172,16 @@ class EpitopeInfo(BaseModel):
     name: str
     residues: list[int]
     chain_id: str
-    antibody_type: Optional[str] = None
-    source: Optional[str] = None
+    antibody_type: str | None = None
+    source: str | None = None
 
 
 class QCResult(BaseModel):
     """Quality control result for a check."""
     passed: bool
     metric_name: str
-    metric_value: Optional[float] = None
-    threshold: Optional[float] = None
+    metric_value: float | None = None
+    threshold: float | None = None
     details: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=utc_now)
 
@@ -190,19 +189,19 @@ class QCResult(BaseModel):
 class NoveltyResult(BaseModel):
     """Result of novelty checking."""
     is_novel: bool
-    closest_match: Optional[str] = None
-    similarity_score: Optional[float] = None
-    search_database: Optional[str] = None
+    closest_match: str | None = None
+    similarity_score: float | None = None
+    search_database: str | None = None
     details: dict[str, Any] = Field(default_factory=dict)
 
 
 class DiversityInfo(BaseModel):
     """Diversity clustering information for a candidate."""
-    sequence_cluster: Optional[str] = None
-    structure_cluster: Optional[str] = None
-    interface_cluster: Optional[str] = None
-    binding_mode_cluster: Optional[str] = None
-    generator_family: Optional[str] = None
+    sequence_cluster: str | None = None
+    structure_cluster: str | None = None
+    interface_cluster: str | None = None
+    binding_mode_cluster: str | None = None
+    generator_family: str | None = None
 
 
 class StatusTransition(BaseModel):
@@ -211,9 +210,9 @@ class StatusTransition(BaseModel):
     to_status: CandidateStatus
     reason: str
     stage: str
-    metric_name: Optional[str] = None
-    metric_value: Optional[float] = None
-    threshold: Optional[float] = None
+    metric_name: str | None = None
+    metric_value: float | None = None
+    threshold: float | None = None
     timestamp: datetime = Field(default_factory=utc_now)
 
 
@@ -223,34 +222,34 @@ class ProvenanceRecord(BaseModel):
     target_id: str
     generator: str
     generator_version: str
-    model_checkpoint: Optional[str] = None
-    git_commit: Optional[str] = None
+    model_checkpoint: str | None = None
+    git_commit: str | None = None
     config_hash: str
-    random_seed: Optional[int] = None
-    hardware: Optional[str] = None
+    random_seed: int | None = None
+    hardware: str | None = None
     timestamp: datetime = Field(default_factory=utc_now)
     input_hashes: dict[str, str] = Field(default_factory=dict)
-    parent_candidate_id: Optional[str] = None
+    parent_candidate_id: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class HardwareInfo(BaseModel):
     """Hardware information for reproducibility."""
-    hostname: Optional[str] = None
-    cpu: Optional[str] = None
-    gpu: Optional[str] = None
+    hostname: str | None = None
+    cpu: str | None = None
+    gpu: str | None = None
     gpu_count: int = 0
-    ram_gb: Optional[float] = None
-    cuda_version: Optional[str] = None
-    python_version: Optional[str] = None
+    ram_gb: float | None = None
+    cuda_version: str | None = None
+    python_version: str | None = None
 
 
 class ErrorRecord(BaseModel):
     """Record of an error during pipeline execution."""
-    candidate_id: Optional[str] = None
+    candidate_id: str | None = None
     stage: str
     error_type: str
     error_message: str
-    traceback: Optional[str] = None
+    traceback: str | None = None
     timestamp: datetime = Field(default_factory=utc_now)
     recoverable: bool = True

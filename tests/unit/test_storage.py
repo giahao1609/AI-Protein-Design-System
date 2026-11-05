@@ -2,20 +2,14 @@
 
 from __future__ import annotations
 
-import pytest
-
 from protein_design.schemas import (
     Candidate,
     CandidateStatus,
     DecisionRecord,
-    DesignType,
     EvidenceLevel,
     EvidenceRecord,
     ExperimentRun,
-    Target,
 )
-from protein_design.storage.database import MetadataStore
-from protein_design.storage.artifacts import ArtifactStore
 
 
 class TestMetadataStore:

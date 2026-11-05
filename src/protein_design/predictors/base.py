@@ -13,7 +13,7 @@ Future implementations:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -23,9 +23,9 @@ from protein_design.schemas import Candidate, Target
 class PredictionResult(BaseModel):
     """Result from a structure prediction."""
     metrics: dict[str, Any] = Field(default_factory=dict)
-    structure_content: Optional[str] = None  # CIF/PDB content as string
-    complex_content: Optional[str] = None    # Complex CIF/PDB content
-    confidence: Optional[float] = None
+    structure_content: str | None = None  # CIF/PDB content as string
+    complex_content: str | None = None    # Complex CIF/PDB content
+    confidence: float | None = None
 
 
 class BasePredictor(ABC):

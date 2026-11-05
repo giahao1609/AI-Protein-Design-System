@@ -43,6 +43,7 @@ def setup_logging(
     log_format = os.environ.get("PROTEIN_DESIGN_LOG_FORMAT", log_format).lower()
 
     # Choose renderer
+    renderer: Any
     if log_format == "json":
         renderer = structlog.processors.JSONRenderer()
     else:

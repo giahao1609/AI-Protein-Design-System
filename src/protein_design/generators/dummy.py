@@ -11,8 +11,7 @@ import random
 from typing import Any
 
 from protein_design.generators.base import BaseGenerator
-from protein_design.schemas import Candidate, Target, DesignType, generate_sequential_id
-
+from protein_design.schemas import Candidate, DesignType, Target, generate_sequential_id
 
 # Standard amino acids
 AMINO_ACIDS = "ACDEFGHIKLMNPQRSTVWY"

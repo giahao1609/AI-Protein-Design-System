@@ -9,16 +9,13 @@ Design principles:
 
 from __future__ import annotations
 
-import json
 import traceback
-from pathlib import Path
-from typing import Any, Optional
 
 from protein_design.config.loader import PipelineConfig
-from protein_design.core.lifecycle import validate_transition, is_terminal
+from protein_design.core.lifecycle import is_terminal
 from protein_design.generators.base import BaseGenerator
+from protein_design.logging import get_logger
 from protein_design.predictors.base import BasePredictor
-from protein_design.validation.base import BaseValidator
 from protein_design.provenance.tracker import create_provenance
 from protein_design.schemas import (
     Candidate,
@@ -26,12 +23,10 @@ from protein_design.schemas import (
     ErrorRecord,
     ExperimentRun,
     Target,
-    hash_dict,
-    utc_now,
 )
 from protein_design.storage.artifacts import ArtifactStore
 from protein_design.storage.database import MetadataStore
-from protein_design.logging import get_logger
+from protein_design.validation.base import BaseValidator
 
 
 class Pipeline:
@@ -71,7 +66,7 @@ class Pipeline:
     def run(
         self,
         target: Target,
-        run: Optional[ExperimentRun] = None,
+        run: ExperimentRun | None = None,
     ) -> ExperimentRun:
         """Execute the full pipeline for a target.
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -36,7 +36,7 @@ class ExperimentRun(BaseModel):
     target_id: str
     pipeline_version: str = ""
     config_hash: str = ""
-    git_commit: Optional[str] = None
+    git_commit: str | None = None
 
     # Environment
     environment: dict[str, str] = Field(
@@ -47,7 +47,7 @@ class ExperimentRun(BaseModel):
 
     # Timing
     started_at: datetime = Field(default_factory=utc_now)
-    finished_at: Optional[datetime] = None
+    finished_at: datetime | None = None
 
     # Reproducibility
     random_seed: int = 42
@@ -57,7 +57,7 @@ class ExperimentRun(BaseModel):
         default_factory=dict,
         description="Full configuration used for this run",
     )
-    output_summary: Optional[dict[str, Any]] = None
+    output_summary: dict[str, Any] | None = None
     candidate_ids: list[str] = Field(default_factory=list)
 
     # Status
@@ -65,7 +65,7 @@ class ExperimentRun(BaseModel):
     errors: list[ErrorRecord] = Field(default_factory=list)
 
     # Checkpoint
-    checkpoint_path: Optional[Path] = Field(
+    checkpoint_path: Path | None = Field(
         default=None,
         description="Path to checkpoint file for resume capability",
     )
@@ -75,7 +75,7 @@ class ExperimentRun(BaseModel):
         self.status = RunStatus.RUNNING
         self.started_at = utc_now()
 
-    def mark_completed(self, summary: Optional[dict] = None) -> None:
+    def mark_completed(self, summary: dict | None = None) -> None:
         """Mark the run as completed."""
         self.status = RunStatus.COMPLETED
         self.finished_at = utc_now()

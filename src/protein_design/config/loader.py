@@ -16,13 +16,12 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 from pydantic import BaseModel, Field
 
 from protein_design.schemas.common import hash_dict
-
 
 # ---------------------------------------------------------------------------
 # Config schema models
@@ -36,12 +35,12 @@ class MetricConfig(BaseModel):
     is established through benchmarking.
     """
     enabled: bool = True
-    threshold: Optional[float] = None
+    threshold: float | None = None
     direction: str = Field(
         default="higher_better",
         description="'higher_better' or 'lower_better'",
     )
-    weight: Optional[float] = None
+    weight: float | None = None
 
 
 class ValidationConfig(BaseModel):
@@ -132,9 +131,9 @@ def _deep_merge(base: dict, override: dict) -> None:
 
 
 def load_config(
-    base_path: Optional[Path] = None,
-    override_paths: Optional[list[Path]] = None,
-    overrides: Optional[dict[str, Any]] = None,
+    base_path: Path | None = None,
+    override_paths: list[Path] | None = None,
+    overrides: dict[str, Any] | None = None,
 ) -> PipelineConfig:
     """Load and validate pipeline configuration.
 

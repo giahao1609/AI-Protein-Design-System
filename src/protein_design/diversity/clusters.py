@@ -7,9 +7,7 @@ to future model integration phases.
 
 from __future__ import annotations
 
-from typing import Any, Optional
-
-from protein_design.schemas.common import DiversityInfo, hash_string
+from protein_design.schemas.common import DiversityInfo
 
 
 def compute_sequence_identity(seq1: str, seq2: str) -> float:
@@ -30,10 +28,10 @@ def compute_sequence_identity(seq1: str, seq2: str) -> float:
 
 def assign_diversity_info(
     generator_family: str,
-    sequence_cluster: Optional[str] = None,
-    structure_cluster: Optional[str] = None,
-    interface_cluster: Optional[str] = None,
-    binding_mode_cluster: Optional[str] = None,
+    sequence_cluster: str | None = None,
+    structure_cluster: str | None = None,
+    interface_cluster: str | None = None,
+    binding_mode_cluster: str | None = None,
 ) -> DiversityInfo:
     """Create a DiversityInfo record.
 

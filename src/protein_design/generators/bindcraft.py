@@ -15,7 +15,7 @@ import shutil
 import subprocess
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import structlog
 
@@ -112,7 +112,7 @@ def serialize_target_settings(
 
 
 def convert_pdb_to_mmcif(
-    pdb_path: Path, output_cif_path: Path, chain_id: Optional[str] = None
+    pdb_path: Path, output_cif_path: Path, chain_id: str | None = None
 ) -> Path:
     """Convert a PDB file to mmCIF format using gemmi.
 
@@ -140,7 +140,7 @@ def convert_pdb_to_mmcif(
 def parse_bindcraft_output(
     output_dir: Path,
     target_id: str,
-    candidate_store_dir: Optional[Path] = None,
+    candidate_store_dir: Path | None = None,
     generator_name: str = "bindcraft",
     generator_version: str = "0.1.0-draft",
 ) -> tuple[list[Candidate], dict[str, Any]]:
@@ -199,15 +199,15 @@ def parse_bindcraft_output(
             seen_hashes.add(seq_hash)
 
             # Extract seed
-            seed_val: Optional[int] = None
-            if "Seed" in row and row["Seed"]:
+            seed_val: int | None = None
+            if row.get("Seed"):
                 try:
                     seed_val = int(float(row["Seed"]))
                 except ValueError:
                     seed_val = None
 
             # Parse numeric metrics safely
-            def _parse_float(key: str) -> Optional[float]:
+            def _parse_float(key: str) -> float | None:
                 val = row.get(key)
                 if val is not None and val != "":
                     try:
@@ -218,7 +218,7 @@ def parse_bindcraft_output(
                         )
                 return None
 
-            def _parse_int(key: str) -> Optional[int]:
+            def _parse_int(key: str) -> int | None:
                 val = row.get(key)
                 if val is not None and val != "":
                     try:
@@ -267,7 +267,7 @@ def parse_bindcraft_output(
                 m_dict: dict[str, float] = {}
                 for metric_label in ["pLDDT", "pTM", "i_pTM", "pAE", "i_pAE"]:
                     col = f"{m}_{metric_label}"
-                    if col in row and row[col]:
+                    if row.get(col):
                         try:
                             m_dict[metric_label] = float(row[col])
                         except ValueError:
@@ -284,8 +284,8 @@ def parse_bindcraft_output(
             if not pdb_cand_file.exists():
                 pdb_cand_file = output_dir / f"{design_name}.pdb"
 
-            binder_cif_path: Optional[Path] = None
-            complex_cif_path: Optional[Path] = None
+            binder_cif_path: Path | None = None
+            complex_cif_path: Path | None = None
 
             if pdb_cand_file.exists():
                 if candidate_store_dir:
@@ -348,7 +348,7 @@ class BindCraftGenerator(BaseGenerator):
         runner_type: str = "mock",
         docker_image: str = "bindcraft:latest",
         timeout_seconds: int = 1800,
-        mock_output_dir: Optional[Path] = None,
+        mock_output_dir: Path | None = None,
     ):
         self.runner_type = runner_type
         self.docker_image = docker_image

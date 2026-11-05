@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -39,7 +38,7 @@ class DecisionRecord(BaseModel):
         default_factory=list,
         description="List of evidence_ids against the claim",
     )
-    benchmark_result: Optional[str] = Field(
+    benchmark_result: str | None = Field(
         default=None,
         description="Reference to benchmark that tested this claim",
     )
@@ -54,7 +53,7 @@ class DecisionRecord(BaseModel):
     # Metadata
     date: datetime = Field(default_factory=utc_now)
     author: str = Field(description="Who made this decision (person or system)")
-    supersedes: Optional[str] = Field(
+    supersedes: str | None = Field(
         default=None,
         description="decision_id of the previous decision this replaces",
     )

@@ -12,7 +12,6 @@ Commands:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -76,7 +75,7 @@ def _get_artifacts():
 def run_demo(
     num_candidates: int = typer.Option(10, "--num", "-n", help="Number of candidates"),
     seed: int = typer.Option(42, "--seed", "-s", help="Random seed"),
-    config_file: Optional[Path] = typer.Option(None, "--config", "-c", help="Config YAML"),
+    config_file: Path | None = typer.Option(None, "--config", "-c", help="Config YAML"),
 ):
     """Run the dummy end-to-end pipeline demo."""
     setup_logging()
@@ -85,8 +84,8 @@ def run_demo(
     from protein_design.core.pipeline import Pipeline
     from protein_design.generators.dummy import DummyGenerator
     from protein_design.predictors.dummy import DummyPredictor
-    from protein_design.validation.dummy import DummyValidator
     from protein_design.schemas import Target
+    from protein_design.validation.dummy import DummyValidator
 
     console.print("\n[bold green]== AI Protein Design System -- Demo Pipeline ==[/bold green]\n")
 
@@ -206,7 +205,7 @@ def run_inspect(
     console.print(info_table)
 
     if run.output_summary:
-        console.print(f"\n[bold]Summary:[/bold]")
+        console.print("\n[bold]Summary:[/bold]")
         for k, v in run.output_summary.items():
             console.print(f"  {k}: {v}")
 
@@ -254,6 +253,7 @@ def target_add(
     """Add a target from a YAML file."""
     setup_logging()
     import yaml
+
     from protein_design.schemas import Target
 
     with open(yaml_file, "r", encoding="utf-8") as f:
@@ -272,8 +272,8 @@ def target_add(
 
 @candidate_app.command("list")
 def candidate_list(
-    target: Optional[str] = typer.Option(None, "--target", "-t", help="Filter by target ID"),
-    status: Optional[str] = typer.Option(None, "--status", "-s", help="Filter by status"),
+    target: str | None = typer.Option(None, "--target", "-t", help="Filter by target ID"),
+    status: str | None = typer.Option(None, "--status", "-s", help="Filter by status"),
     limit: int = typer.Option(50, "--limit", "-l", help="Max results"),
 ):
     """List candidates with optional filters."""
@@ -338,18 +338,18 @@ def candidate_inspect(
     console.print(info_table)
 
     # Sequence
-    console.print(f"\n[bold]Sequence:[/bold]")
+    console.print("\n[bold]Sequence:[/bold]")
     console.print(f"  {candidate.sequence[:80]}{'...' if len(candidate.sequence) > 80 else ''}")
 
     # Metrics
     if candidate.metrics:
-        console.print(f"\n[bold]Metrics:[/bold]")
+        console.print("\n[bold]Metrics:[/bold]")
         for k, v in candidate.metrics.items():
             console.print(f"  {k}: {v}")
 
     # Status history
     if candidate.status_history:
-        console.print(f"\n[bold]Status History:[/bold]")
+        console.print("\n[bold]Status History:[/bold]")
         hist_table = Table()
         hist_table.add_column("From", style="dim")
         hist_table.add_column("To", style="cyan")
@@ -368,7 +368,7 @@ def candidate_inspect(
 
     # Provenance
     if candidate.provenance:
-        console.print(f"\n[bold]Provenance:[/bold]")
+        console.print("\n[bold]Provenance:[/bold]")
         prov = candidate.provenance
         prov_table = Table(show_header=False, box=None)
         prov_table.add_column("Field", style="dim")

@@ -2,22 +2,17 @@
 
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
+from collections.abc import Generator
 
 import pytest
 
-from protein_design.schemas import Target, Candidate, ExperimentRun, EvidenceRecord, DecisionRecord
-from protein_design.schemas.common import (
-    CandidateStatus,
-    DesignType,
-    EvidenceLevel,
-    ScientificStatus,
-    generate_id,
-)
-from protein_design.storage.database import MetadataStore
-from protein_design.storage.artifacts import ArtifactStore
 from protein_design.config.loader import PipelineConfig
+from protein_design.schemas import Candidate, Target
+from protein_design.schemas.common import (
+    DesignType,
+)
+from protein_design.storage.artifacts import ArtifactStore
+from protein_design.storage.database import MetadataStore
 
 
 @pytest.fixture
@@ -27,7 +22,7 @@ def tmp_dir(tmp_path):
 
 
 @pytest.fixture
-def db(tmp_path) -> MetadataStore:
+def db(tmp_path) -> Generator[MetadataStore, None, None]:
     """Provide an initialized in-memory-like SQLite database."""
     db_path = tmp_path / "test.db"
     store = MetadataStore(db_path)
