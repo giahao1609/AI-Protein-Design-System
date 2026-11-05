@@ -100,7 +100,8 @@ class MetadataStore:
         data = candidate.model_dump_json()
         self.conn.execute(
             """INSERT INTO candidates
-               (candidate_id, target_id, sequence, sequence_hash, status, scientific_status, generator, data)
+               (candidate_id, target_id, sequence, sequence_hash,
+                status, scientific_status, generator, data)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                ON CONFLICT(candidate_id) DO UPDATE SET
                    status=excluded.status,
@@ -138,7 +139,8 @@ class MetadataStore:
         ]
         self.conn.executemany(
             """INSERT INTO candidates
-               (candidate_id, target_id, sequence, sequence_hash, status, scientific_status, generator, data)
+               (candidate_id, target_id, sequence, sequence_hash,
+                status, scientific_status, generator, data)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                ON CONFLICT(candidate_id) DO UPDATE SET
                    status=excluded.status,
@@ -344,7 +346,8 @@ class MetadataStore:
         cand_str = ",".join(candidate_ids)
         self.conn.execute(
             """INSERT INTO submission_history
-               (submission_id, target_name, mode, version_tag, candidate_ids, file_path, update_note)
+               (submission_id, target_name, mode, version_tag,
+                candidate_ids, file_path, update_note)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (submission_id, target_name, mode, version_tag, cand_str, file_path, update_note),
         )
