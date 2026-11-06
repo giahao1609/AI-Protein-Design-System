@@ -51,7 +51,7 @@ The table below summarizes the audited specifications across all seven official 
 | Track | Target Identifier | Molecule Type | Length Constraint | Chinese / Announcement Range | English Portal Range | Status in System |
 |---|---|---|---|---|---|---|
 | **1** | **EGFR** | VHH (Nanobody) | 100–150 aa | Met1–Ser645 (Signal masked: 1–24) | Leu25–Ser645 | **CONFIRMED / CONSISTENT** (Signal peptide masked in local pipeline) |
-| **2** | **TNF-α** | Minibinder | 40–100 aa | Val77–Leu233 (157 aa mature monomer) | Val77–Leu233 | **CONFIRMED / CONSISTENT** (Homotrimer biological context) |
+| **2** | **TNF-α** | VHH (Nanobody) | 100–150 aa | Val77–Leu233 (157 aa mature monomer) | Val77–Leu233 | **CONFIRMED / CONSISTENT** (Homotrimer biological context) |
 | **3** | **GLP-1R** | VHH (Nanobody) | 100–150 aa | **Ala21–Glu139** (119 aa, ECD only) | **Arg24–Ser432** (409 aa, ECD + 7TM) | **PENDING_ORGANIZER_CONFIRMATION** (Severe architectural conflict) |
 | **4** | **TfR1** | VHH (Nanobody) | 100–150 aa | Cys89–Phe760 (672 aa ectodomain) | Cys89–Phe760 | **CONFIRMED / CONSISTENT** (Homodimer biological context) |
 | **5** | **TL1A** | Minibinder | 40–100 aa | Leu72–Leu251 (180 aa mature monomer) | Leu72–Leu251 | **CONFIRMED / CONSISTENT** (Homotrimer biological context) |
@@ -161,7 +161,7 @@ The organizer's declared in silico screening configuration:
 
 ## 10. Official Inquiry to Organizing Committee (Bilingual)
 
-To resolve the specification conflicts authoritatively, the following clarification inquiry is prepared for submission to the competition committee (`contact@aiprotein.sjtu.edu.cn`):
+To resolve the specification conflicts authoritatively, the following clarification inquiry is prepared for submission to the competition committee (`zbztzhz@sjtu.edu.cn`):
 
 ### Chinese-Language Clarification Message
 ```text
@@ -199,7 +199,7 @@ To resolve the specification conflicts authoritatively, the following clarificat
 | Track | Target | Specification Certainty | Local Implementation Status | Decision |
 |---|---|---|---|---|
 | **1** | **EGFR** | High (Consistent) | VHH generator active, pH 6.0 Histidine enrichment verified. | **GO** |
-| **2** | **TNF-α** | High (Consistent) | Minibinder generator active, trimer context accounted for. | **GO** |
+| **2** | **TNF-α** | High (Consistent) | VHH generator active, trimer context accounted for. | **GO** |
 | **3** | **GLP-1R** | Medium (Bilingual Conflict) | Soluble ECD active; allosteric agonist mode supported. Full 7TM standby model documented. | **CONDITIONAL GO (Pending Confirmation)** |
 | **4** | **TfR1** | High (Consistent) | VHH generator active, homodimer apical epitope accounted for. | **GO** |
 | **5** | **TL1A** | High (Consistent) | Minibinder generator active, trimer context accounted for. | **GO** |
@@ -214,3 +214,4 @@ To resolve the specification conflicts authoritatively, the following clarificat
 2. **Submit Clarification:** Transmit the formal inquiry message to the organizing committee.
 3. **Dual-Range Contingency Ready:** If organizers mandate the English range (`Arg24-Ser432` for GLP-1R), activate the prepared 7TM config without delay.
 4. **AsterFire Execution 24000:** Await cluster concurrency quota approval before resuming cloud execution.
+

@@ -58,14 +58,17 @@ def test_generate_submission_rolling_and_fallback(tmp_path):
     real_struct = tmp_path / "structure.cif"
     real_struct.write_text("data_test\n_entry.id 1\n")
 
-    seq = "ACDEFGHIKLMNPQRSTVWY" * 3  # 60 aa
+    # Valid 118 aa VHH sequence for TNF-α (Track 2 is official VHH, 100-150 aa)
+    vhh_seq = (
+        "EVQLVESGGGLVQPGGSLRLSCAASGFTFSSYAMSWVRQAPGKGLEWVSAISGSGGSTYYADSVKGRFTISRDNSKNTLYLQMNSLRAEDTAVYYCAKDRLSGHYWGQGTLVTVSS"
+    )
     candidates = [
         Candidate(
             candidate_id=f"cand_{i+1:03d}",
             target_id="TNF-α",
-            sequence=seq,
-            generator="bindcraft",
-            generator_version="0.1.0-draft",
+            sequence=vhh_seq,
+            generator="vhh_scaffold",
+            generator_version="1.0.0-competition",
             structure_path=real_struct,
             metadata={"validation_history": ["RosettaFastRelax"]},
         )
@@ -77,7 +80,7 @@ def test_generate_submission_rolling_and_fallback(tmp_path):
         candidates=candidates,
         target_name="TNF-α",
         output_dir=tmp_path / "submissions",
-        molecule_type="minibinder",
+        molecule_type="VHH",
         mode="early_claim",
         generate_ascii_fallback=True,
     )

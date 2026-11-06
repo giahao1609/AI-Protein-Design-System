@@ -53,15 +53,29 @@ class CompetitionCampaignRunner:
         )
 
     def load_target(self, target_identifier: str | int) -> Target:
-        """Load target definition from target ID (e.g. 'EGFR', 'TL1A') or track number (1–7)."""
-        search_term = str(target_identifier).lower()
+        """Load target definition from target ID (e.g. 'EGFR', 'TNF-alpha', 'TL1A') or track number (1–7)."""
+        search_term = str(target_identifier).lower().strip()
+        search_norm = search_term.replace("-", "").replace("_", "")
         yaml_files = sorted(self.targets_dir.glob("*.yaml"))
 
         matched_file: Path | None = None
         for yf in yaml_files:
-            if search_term in yf.stem.lower():
+            stem_norm = yf.stem.lower().replace("-", "").replace("_", "")
+            if search_term in yf.stem.lower() or search_norm in stem_norm:
                 matched_file = yf
                 break
+            # Check content target_id or track_id
+            try:
+                with open(yf, "r", encoding="utf-8") as f:
+                    content = yaml.safe_load(f)
+                    tid = str(content.get("target_id", "")).lower()
+                    tid_norm = tid.replace("-", "").replace("_", "")
+                    track_id = str(content.get("metadata", {}).get("track_id", ""))
+                    if search_term in (tid, track_id) or search_norm in (tid_norm, track_id):
+                        matched_file = yf
+                        break
+            except Exception:
+                continue
 
         if not matched_file:
             raise FileNotFoundError(

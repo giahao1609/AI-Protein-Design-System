@@ -78,3 +78,37 @@ def test_competition_campaign_runner(tmp_path: Path) -> None:
     history = db.get_submission_history(target_name="EGFR")
     assert len(history) == 1
     assert history[0]["mode"] == "early_claim"
+
+
+def test_tnfa_track_vhh_campaign_execution(tmp_path: Path) -> None:
+    """Verify that Track 2 (TNF-alpha) is executed as VHH (100-150 aa) per official rules."""
+    db_path = tmp_path / "campaign_tnfa_test.db"
+    db = MetadataStore(db_path)
+    db.initialize()
+    artifacts = ArtifactStore(tmp_path / "artifacts")
+
+    runner = CompetitionCampaignRunner(
+        db=db,
+        artifacts=artifacts,
+        targets_dir="competition/targets",
+    )
+
+    result = runner.run_track_campaign(
+        target_identifier="TNF-alpha",
+        num_candidates=3,
+        mode="early_claim",
+        output_dir=tmp_path / "submissions",
+        seed=100,
+    )
+
+    assert result["target_id"] == "TNF-alpha"
+    assert result["generator"] == "vhh_scaffold"
+    assert result["molecule_type"] == "VHH"
+    assert result["valid_candidates"] == 3
+
+    cands_in_db = db.list_candidates(target_id="TNF-alpha")
+    assert len(cands_in_db) == 3
+    for cand in cands_in_db:
+        assert 100 <= len(cand.sequence) <= 150
+        assert cand.sequence.count("C") == 2
+        assert cand.generator == "vhh_scaffold"
