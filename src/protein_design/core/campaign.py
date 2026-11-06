@@ -154,9 +154,9 @@ class CompetitionCampaignRunner:
             # Persist candidate to MetadataStore
             self.db.save_candidate(cand)
 
-        # 3. Sort candidates by ipSAE score descending (best first)
+        # 3. Sort candidates by ipSAE score descending (best first, handling None safely)
         valid_candidates.sort(
-            key=lambda c: float(c.metrics.get("ipsae_score", 0.0)),
+            key=lambda c: float(c.metrics.get("ipsae_score") or 0.0),
             reverse=True,
         )
 

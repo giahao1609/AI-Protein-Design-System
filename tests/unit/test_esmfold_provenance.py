@@ -58,3 +58,4 @@ def test_esmfold_predictor_strict_real_model_returns_unavailable() -> None:
     assert result.confidence is None
     assert result.metrics["ipsae_score"] is None
     assert result.metrics["score_status"] == "UNAVAILABLE"
+

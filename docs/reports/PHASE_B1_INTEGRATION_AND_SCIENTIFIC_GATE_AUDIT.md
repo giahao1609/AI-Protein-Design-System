@@ -182,3 +182,4 @@ The software, validation gates, scheduling safeguards, and provenance tracking a
 3. **Execute Serialized Calibration:** Run AsterFire `threshold_compute` for the 7 tracks under `max_concurrency=1` to generate authentic `thresholds.json`.
 4. **Ingest Verified Thresholds:** Run `update_target_calibration(..., enforce_production=True)` to commit authentic empirical thresholds into production YAML configurations.
 5. **Dispatch Production ESMFold2 Scoring:** Execute GPU prediction for candidate libraries with `score_provenance: MODEL_PREDICTED`.
+

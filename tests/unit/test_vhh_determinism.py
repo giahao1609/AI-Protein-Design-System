@@ -45,3 +45,4 @@ def test_vhh_generator_inter_target_collision_prevention() -> None:
     assert len(seqs_tnf) == 5
     assert len(seqs_tfr1) == 5
     assert len(seqs_tnfr1) == 5
+

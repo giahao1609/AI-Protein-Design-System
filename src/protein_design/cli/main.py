@@ -230,7 +230,7 @@ def run_campaign(
         candidates = db.list_candidates(target_id=result["target_id"])
         top_ipsae = "-"
         if candidates:
-            scores = [float(c.metrics.get("ipsae_score", 0.0)) for c in candidates if c.status.value == "VALID"]
+            scores = [float(c.metrics.get("ipsae_score") or 0.0) for c in candidates if c.status.value == "VALID"]
             if scores:
                 top_ipsae = f"{max(scores):.4f}"
 
