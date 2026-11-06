@@ -75,6 +75,9 @@ class Candidate(BaseModel):
     # Diversity
     diversity_cluster: Optional[DiversityInfo] = None
 
+    # Metadata & Custom Attributes
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
     # Status
     status: CandidateStatus = CandidateStatus.CREATED
     scientific_status: ScientificStatus = ScientificStatus.GENERATED

@@ -62,3 +62,8 @@ class CandidateLifecycleError(ProteinDesignError):
         self.candidate_id = candidate_id
         self.from_status = from_status
         self.to_status = to_status
+
+
+class SecurityIntegrityError(ProteinDesignError):
+    """Error raised when export safety or scientific provenance gates fail."""
+    pass
