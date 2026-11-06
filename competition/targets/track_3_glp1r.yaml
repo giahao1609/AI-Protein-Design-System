@@ -55,6 +55,11 @@ metadata:
   reference_chain: R
   special_requirements: Agonist (receptor activation)
   ph_condition: null
+  signal_peptide_mask: [1, 3]
+  allosteric_agonist_mode: true
+  min_distance_to_glp1_peptide_angstrom: 15.0
+  min_distance_to_tmd_linker_angstrom: 10.0
+  nanobody_35_blacklist: true
   monomer_isolated_hotspot: false
   mechanism: agonist
   domain_type: ECD_only

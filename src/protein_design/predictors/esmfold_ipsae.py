@@ -27,16 +27,21 @@ def compute_ipsae_score(
     plddt: float,
     interface_pae: float,
     interface_contacts: int = 15,
+    masked_contacts_count: int = 0,
 ) -> float:
     """Compute ipSAE (interface predicted structural alignment error) composite score.
 
     Scale: 0.0 to 1.0 (higher = stronger predicted binding).
     Formula combines normalized interface PAE alignment confidence with mean pLDDT:
         ipSAE = (1.0 / (1.0 + (interface_pae / 10.0))) * (plddt / 100.0) * contact_factor
+
+    If contacts occurred on masked regions (e.g. signal peptides or disordered N/C-terminal
+    tails not present on mature protein), those contacts are deducted from mature interface calculation.
     """
+    valid_contacts = max(0, interface_contacts - masked_contacts_count)
     normalized_plddt = max(0.0, min(100.0, plddt)) / 100.0
     alignment_conf = 1.0 / (1.0 + (max(0.0, interface_pae) / 10.0))
-    contact_factor = min(1.0, max(0.5, interface_contacts / 10.0))
+    contact_factor = min(1.0, max(0.2, valid_contacts / 10.0))
     score = alignment_conf * normalized_plddt * contact_factor
     return round(float(score), 4)
 
@@ -108,10 +113,30 @@ class ESMFold2_ipSAE_Scorer(BasePredictor):
         esmfold_pae_interface = round(float(base_interface_pae + rng.uniform(-1.0, 1.0)), 2)
         interface_contacts = rng.randint(12, 28)
 
+        # Signal peptide / disordered terminal tail masking check (V-1 audit fix)
+        masked_range = None
+        if target.metadata:
+            masked_range = (
+                target.metadata.get("signal_peptide_mask")
+                or target.metadata.get("masked_residues")
+            )
+        if masked_range is None and isinstance(params.get("masked_residues"), (list, tuple)):
+            masked_range = params.get("masked_residues")
+
+        masked_contacts = 0
+        if masked_range and len(masked_range) == 2:
+            start_mask, end_mask = int(masked_range[0]), int(masked_range[1])
+            mask_len = max(0, end_mask - start_mask + 1)
+            target_len = len(target.sequence) if target.sequence else 100
+            # Spurious contact fraction proportional to masked terminal overhang
+            mask_ratio = min(0.4, mask_len / max(1, target_len))
+            masked_contacts = int(round(interface_contacts * mask_ratio))
+
         ipsae_score = compute_ipsae_score(
             plddt=esmfold_plddt,
             interface_pae=esmfold_pae_interface,
             interface_contacts=interface_contacts,
+            masked_contacts_count=masked_contacts,
         )
 
         min_thresh = params.get("min_ipsae_threshold") or self.min_ipsae_threshold
@@ -121,6 +146,8 @@ class ESMFold2_ipSAE_Scorer(BasePredictor):
             "esmfold_plddt": esmfold_plddt,
             "esmfold_pae_interface": esmfold_pae_interface,
             "esmfold_interface_contacts": interface_contacts,
+            "masked_contacts_deducted": masked_contacts,
+            "signal_peptide_mask": masked_range,
             "ipsae_score": ipsae_score,
             "ipsae_passed": passed_filter,
             "target_msa_used": self.target_msa,

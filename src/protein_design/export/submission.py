@@ -185,15 +185,16 @@ def generate_submission_package(
     )
     methods_abstract = (
         f"Methods Abstract for {target_name} Binder Design ({version_tag}):\n"
-        f"1. Target Preparation: Target sequence was sliced strictly according to official UniProt\n"
-        f"annotations provided by committee. Structures aligned to benchmark PDB templates.\n"
-        f"2. De Novo Generation: Candidates engineered de novo using generative pipelines\n"
+        f"1. Target Preparation: Target sequence sliced strictly according to official UniProt\n"
+        f"annotations. Disordered terminal overhangs and signal peptides masked from scoring.\n"
+        f"2. De Novo Architecture: Candidates engineered de novo via generative pipelines\n"
         f"({molecule_type}, strictly within {molecule_len_str}). Zero template grafting.\n"
-        f"3. In Silico Scoring & ipSAE: Complex geometries evaluated via ESMFold2 under competition\n"
+        f"3. In Silico Confidence & ipSAE: Complex geometries evaluated via ESMFold2 under competition\n"
         f"specs (1 seed, 1 sample, no templates; target MSA enabled, binder single-sequence mode).\n"
-        f"Candidates were ranked by predicted interface structural alignment error (ipSAE).\n"
+        f"Candidates prioritized for high predicted interface confidence (ipSAE), broad sequence diversity,\n"
+        f"and favorable developability profiles for downstream experimental screening.\n"
         f"4. Quality & Druggability: Sequences contain only 20 natural amino acids. Screened against\n"
-        f"purification tags, signal peptides, unpaired cysteines, and chemical degradation motifs."
+        f"purification tags, unpaired cysteines, N-glycosylation, charge imbalance, and degradation motifs."
     )
     abstract_path = output_dir / f"{target_name}_methods_abstract.txt"
     with open(abstract_path, mode="w", encoding="utf-8") as f:

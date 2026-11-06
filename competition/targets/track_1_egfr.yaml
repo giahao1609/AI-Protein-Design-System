@@ -51,6 +51,9 @@ metadata:
   reference_chain: A
   special_requirements: Measure affinity at acidic pH = 6.0
   ph_condition: 6.0
+  signal_peptide_mask: [1, 24]
+  domain_iii_epitope_range: [334, 504]
+  glycan_mask_distance_angstrom: 10.0
   monomer_isolated_hotspot: false
   mechanism: inhibitor
   domain_type: full_mature

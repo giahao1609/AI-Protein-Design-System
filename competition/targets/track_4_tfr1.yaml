@@ -48,6 +48,8 @@ metadata:
   reference_chain: A, B
   special_requirements: null
   ph_condition: null
+  signal_peptide_mask: [1, 12]
+  target_domain: apical
   monomer_isolated_hotspot: false
   mechanism: inhibitor
   domain_type: full_mature

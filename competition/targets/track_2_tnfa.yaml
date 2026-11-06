@@ -52,5 +52,6 @@ metadata:
   special_requirements: null
   ph_condition: null
   monomer_isolated_hotspot: true
+  trimer_clash_clearance_angstrom: 3.0
   mechanism: inhibitor
   domain_type: full_mature

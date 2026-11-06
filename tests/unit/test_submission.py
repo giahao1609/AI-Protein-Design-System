@@ -206,3 +206,74 @@ def test_esmfold_ipsae_scorer():
     assert m["target_msa_used"] is True
     assert m["design_msa_used"] is False
     assert 0.0 <= m["ipsae_score"] <= 1.0
+
+
+def test_nanobody35_blacklist_and_multischeme_collision():
+    """Verify Nanobody35 hard blacklist rejection and multi-scheme collision checks."""
+    from protein_design.validation.druggability import (
+        NANOBODY_35_SEQUENCE,
+        extract_vhh_cdrs_all_schemes,
+    )
+
+    # 1. Multi-scheme extraction check
+    schemes = extract_vhh_cdrs_all_schemes(NANOBODY_35_SEQUENCE)
+    assert set(schemes.keys()) == {"imgt", "kabat", "chothia", "abm"}
+    for s in ("imgt", "kabat", "chothia", "abm"):
+        assert "cdr1" in schemes[s]
+        assert "cdr2" in schemes[s]
+        assert "cdr3" in schemes[s]
+
+    # 2. Nanobody35 hard blacklist rejection
+    with pytest.raises(SecurityIntegrityError, match="Disqualification Risk: Candidate .* Nanobody35"):
+        verify_anti_collision(
+            candidate_seq=NANOBODY_35_SEQUENCE,
+            pool_sequences=[],
+            molecule_type="vhh",
+            candidate_id="cand_nb35_mimic",
+        )
+
+    # 3. Multi-scheme CDR collision check between two identical VHHs
+    mock_vhh = (
+        "EVQLVESGGGLVQPGGSLRLSCAASGFTFSSYAMSWVRQAPGKGLEWVSAISGSGGSTYYADSVKG"
+        "RFTISRDNSKNTLYLQMNSLRAEDTAVYYCAKDGYYGNYDYWGQGTLVTVSS"
+    )
+    with pytest.raises(SecurityIntegrityError, match="Anti-collision violation .* Identical CDRs"):
+        verify_anti_collision(
+            candidate_seq=mock_vhh,
+            pool_sequences=[mock_vhh],
+            molecule_type="vhh",
+            candidate_id="cand_vhh_dup",
+        )
+
+
+def test_advanced_druggability_and_masking():
+    """Verify advanced biophysical developability gates and signal peptide masking."""
+    from protein_design.predictors.esmfold_ipsae import compute_ipsae_score
+    from protein_design.validation.druggability import (
+        calculate_isoelectric_point,
+        calculate_net_charge,
+    )
+
+    seq = "ACDEFGHIKLMNPQRSTVWY" * 3
+    pi = calculate_isoelectric_point(seq)
+    charge_74 = calculate_net_charge(seq, ph=7.4)
+    assert 4.0 <= pi <= 10.0
+    assert -10.0 <= charge_74 <= 10.0
+
+    # Test charge run rejection (e.g. KKKK)
+    charge_run_seq = "ACDEFGHIKLMNPQRSTVWY" + "KKKK" + "ACDEFGHIKLMNPQRSTVWY"
+    res_run = check_druggability(charge_run_seq, molecule_type="minibinder")
+    assert len(res_run["charge_runs"]) > 0
+    assert res_run["passed"] is False
+
+    # Test hydrophobic patch rejection (e.g. LLLLV)
+    patch_seq = "ACDEFGHIKLMNPQRSTVWY" + "LLLLV" + "ACDEFGHIKLMNPQRSTVWY"
+    res_patch = check_druggability(patch_seq, molecule_type="minibinder")
+    assert len(res_patch["hydrophobic_patches"]) > 0
+    assert res_patch["passed"] is False
+
+    # Test signal peptide masking calculation
+    unmasked_score = compute_ipsae_score(plddt=85.0, interface_pae=6.0, interface_contacts=20, masked_contacts_count=0)
+    masked_score = compute_ipsae_score(plddt=85.0, interface_pae=6.0, interface_contacts=20, masked_contacts_count=15)
+    assert unmasked_score > masked_score
+

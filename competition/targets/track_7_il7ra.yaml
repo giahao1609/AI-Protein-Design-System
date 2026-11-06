@@ -50,6 +50,8 @@ metadata:
   reference_chain: B
   special_requirements: null
   ph_condition: null
+  signal_peptide_mask: [1, 20]
+  target_domain: D1_D2_elbow
   monomer_isolated_hotspot: false
   mechanism: inhibitor
   domain_type: full_mature
