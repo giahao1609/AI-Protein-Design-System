@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 
 from protein_design.core.campaign import CompetitionCampaignRunner
 from protein_design.generators.vhh import VHHScaffoldGenerator
@@ -10,7 +11,7 @@ from protein_design.storage.artifacts import ArtifactStore
 from protein_design.storage.database import MetadataStore
 
 
-def test_vhh_scaffold_generator(tmp_path):
+def test_vhh_scaffold_generator(tmp_path: Path) -> None:
     """Test VHHScaffoldGenerator produces valid 100-150 aa antibodies with 2 Cysteines."""
     target = Target(
         target_id="EGFR",
@@ -39,7 +40,7 @@ def test_vhh_scaffold_generator(tmp_path):
         assert c.generator == "vhh_scaffold"
 
 
-def test_competition_campaign_runner(tmp_path):
+def test_competition_campaign_runner(tmp_path: Path) -> None:
     """Test end-to-end competition track campaign execution and submission package export."""
     db_path = tmp_path / "campaign_test.db"
     db = MetadataStore(db_path)

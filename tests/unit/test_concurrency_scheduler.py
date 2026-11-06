@@ -5,21 +5,25 @@ from __future__ import annotations
 from protein_design.core.concurrency import ConcurrencySafeScheduler, TaskStatus
 
 
-def test_scheduler_linear_pipeline_execution():
+def test_scheduler_linear_pipeline_execution() -> None:
     scheduler = ConcurrencySafeScheduler(max_concurrency=1)
     call_order: list[str] = []
 
-    scheduler.add_node("step1", lambda: call_order.append("step1") or "out1")
-    scheduler.add_node(
-        "step2",
-        lambda: call_order.append("step2") or "out2",
-        dependencies=["step1"],
-    )
-    scheduler.add_node(
-        "step3",
-        lambda: call_order.append("step3") or "out3",
-        dependencies=["step2"],
-    )
+    def step1_func() -> str:
+        call_order.append("step1")
+        return "out1"
+
+    def step2_func() -> str:
+        call_order.append("step2")
+        return "out2"
+
+    def step3_func() -> str:
+        call_order.append("step3")
+        return "out3"
+
+    scheduler.add_node("step1", step1_func)
+    scheduler.add_node("step2", step2_func, dependencies=["step1"])
+    scheduler.add_node("step3", step3_func, dependencies=["step2"])
 
     results = scheduler.run_all()
     assert results["step1"] == TaskStatus.SUCCESS
@@ -28,12 +32,12 @@ def test_scheduler_linear_pipeline_execution():
     assert call_order == ["step1", "step2", "step3"]
 
 
-def test_scheduler_max_concurrency_throttling():
+def test_scheduler_max_concurrency_throttling() -> None:
     scheduler = ConcurrencySafeScheduler(max_concurrency=1)
     active_concurrent = 0
     max_observed = 0
 
-    def mock_task():
+    def mock_task() -> str:
         nonlocal active_concurrent, max_observed
         active_concurrent += 1
         max_observed = max(max_observed, active_concurrent)
@@ -49,11 +53,11 @@ def test_scheduler_max_concurrency_throttling():
     assert max_observed <= 1
 
 
-def test_scheduler_exponential_backoff_retry():
+def test_scheduler_exponential_backoff_retry() -> None:
     scheduler = ConcurrencySafeScheduler(max_concurrency=1)
     attempts = 0
 
-    def flaky_task():
+    def flaky_task() -> str:
         nonlocal attempts
         attempts += 1
         if attempts < 3:
@@ -67,10 +71,10 @@ def test_scheduler_exponential_backoff_retry():
     assert attempts == 3
 
 
-def test_scheduler_failed_node_stops_downstream():
+def test_scheduler_failed_node_stops_downstream() -> None:
     scheduler = ConcurrencySafeScheduler(max_concurrency=1)
 
-    def failing_task():
+    def failing_task() -> None:
         raise RuntimeError("Permanent failure")
 
     scheduler.add_node("upstream", failing_task, max_retries=1, base_backoff_seconds=0.01)
@@ -81,7 +85,7 @@ def test_scheduler_failed_node_stops_downstream():
     assert results["downstream"] == TaskStatus.FAILED
 
 
-def test_scheduler_resume_idempotency_skips_cached_artifacts():
+def test_scheduler_resume_idempotency_skips_cached_artifacts() -> None:
     completed_cache = {"step1": "cached_output_1"}
     scheduler = ConcurrencySafeScheduler(max_concurrency=1, completed_artifacts=completed_cache)
 
