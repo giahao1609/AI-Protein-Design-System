@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+from pydantic import ValidationError as PydanticValidationError
+
 from protein_design.core.exceptions import ValidationError
 from protein_design.validation.calibration import (
     CalibrationReport,
@@ -111,5 +113,60 @@ def test_update_target_calibration_applies_metrics():
     assert updated["baseline_true_ipsae"] == 0.824
     assert updated["noise_floor_ipsae"] == 0.28
     assert updated["calibrated_threshold"] == 0.55
-    assert updated["calibration_status"] == "CALIBRATED"
+    assert updated["calibration_status"] == "CALIBRATED_EMPIRICAL"
     assert "calibration_snr" in updated
+
+
+def test_assess_calibration_quality_near_zero_denominator():
+    payload = TargetThresholdPayload(
+        target_id="TINY_NOISE",
+        track_id=3,
+        baseline_true_ipsae=0.75,
+        decoy_distribution=DecoyDistributionSchema(mean=0.0, std=0.0, p95=0.0, num_decoys=20),
+        noise_floor_ipsae=0.0,
+        calibrated_threshold=0.50,
+    )
+    quality = assess_calibration_quality(payload)
+    assert quality["is_reliable"] is False
+    assert any("Near-zero" in w for w in quality["warnings"])
+
+
+def test_assess_calibration_quality_insufficient_decoys():
+    payload = TargetThresholdPayload(
+        target_id="FEW_DECOYS",
+        track_id=4,
+        baseline_true_ipsae=0.80,
+        decoy_distribution=DecoyDistributionSchema(mean=0.20, std=0.05, p95=0.25, num_decoys=5),
+        noise_floor_ipsae=0.25,
+        calibrated_threshold=0.50,
+    )
+    quality = assess_calibration_quality(payload)
+    assert quality["is_reliable"] is False
+    assert any("Insufficient decoy" in w for w in quality["warnings"])
+
+
+def test_calibration_schema_rejects_nan():
+    with pytest.raises(PydanticValidationError):
+        TargetThresholdPayload(
+            target_id="NAN_TARGET",
+            track_id=1,
+            baseline_true_ipsae=float("nan"),
+            decoy_distribution=DecoyDistributionSchema(mean=0.2, std=0.05, p95=0.25, num_decoys=20),
+            noise_floor_ipsae=0.25,
+            calibrated_threshold=0.50,
+        )
+
+
+def test_update_target_calibration_rejects_synthetic_fixture_in_production():
+    payload = TargetThresholdPayload(
+        target_id="EGFR",
+        track_id=1,
+        baseline_true_ipsae=0.80,
+        decoy_distribution=DecoyDistributionSchema(mean=0.20, std=0.05, p95=0.25, num_decoys=20),
+        noise_floor_ipsae=0.25,
+        calibrated_threshold=0.50,
+        calibration_status="SYNTHETIC_TEST_FIXTURE",
+    )
+    initial_meta = {"track_id": 1}
+    with pytest.raises(ValidationError, match="rejected synthetic calibration fixture"):
+        update_target_calibration(initial_meta, payload, enforce_production=True)

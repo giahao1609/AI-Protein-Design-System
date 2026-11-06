@@ -98,6 +98,17 @@ class ScientificStatus(str, Enum):
     EXPERIMENTALLY_VALIDATED = "EXPERIMENTALLY_VALIDATED"
 
 
+class ScoreProvenance(str, Enum):
+    """Scientific score provenance classification.
+
+    Prevents simulated, proxy, or synthetic numbers from masquerading as real predictions.
+    """
+    HEURISTIC_PROXY = "HEURISTIC_PROXY"
+    MODEL_PREDICTED = "MODEL_PREDICTED"
+    EXPERIMENTAL = "EXPERIMENTAL"
+    UNVERIFIED = "UNVERIFIED"
+
+
 class RunStatus(str, Enum):
     """Status of an experiment run."""
     PENDING = "PENDING"

@@ -17,7 +17,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from protein_design.schemas import Candidate, Target
+from protein_design.schemas import Candidate, ScoreProvenance, Target
 
 
 class PredictionResult(BaseModel):
@@ -26,6 +26,7 @@ class PredictionResult(BaseModel):
     structure_content: str | None = None  # CIF/PDB content as string
     complex_content: str | None = None    # Complex CIF/PDB content
     confidence: float | None = None
+    score_provenance: str = ScoreProvenance.UNVERIFIED.value
 
 
 class BasePredictor(ABC):

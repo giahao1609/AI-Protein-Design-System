@@ -7,6 +7,8 @@ completed work on compute clusters.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -16,6 +18,24 @@ from typing import Any
 import structlog
 
 log = structlog.get_logger(__name__)
+
+
+def calculate_task_fingerprint(
+    input_data: Any,
+    config: dict[str, Any] | None = None,
+    model_version: str | None = None,
+) -> str:
+    """Compute deterministic cryptographic fingerprint to guarantee cache provenance.
+
+    Requires input hash, config hash, and model version.
+    """
+    payload = {
+        "input": input_data,
+        "config": config or {},
+        "model_version": model_version or "default",
+    }
+    serialized = json.dumps(payload, sort_keys=True, default=str)
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
 class TaskStatus(str, Enum):
@@ -41,6 +61,7 @@ class TaskNode:
     result: Any = None
     error: str | None = None
     output_artifact_id: str | None = None
+    expected_fingerprint: str | None = None
 
 
 class ConcurrencySafeScheduler:
@@ -64,8 +85,9 @@ class ConcurrencySafeScheduler:
         max_retries: int = 3,
         base_backoff_seconds: float = 0.05,
         output_artifact_id: str | None = None,
+        expected_fingerprint: str | None = None,
     ) -> None:
-        """Register a node in the workflow graph."""
+        """Register a node in the workflow graph with optional provenance fingerprint."""
         if node_id in self.nodes:
             raise ValueError(f"Node '{node_id}' already registered in scheduler")
         self.nodes[node_id] = TaskNode(
@@ -75,12 +97,39 @@ class ConcurrencySafeScheduler:
             max_retries=max_retries,
             base_backoff_seconds=base_backoff_seconds,
             output_artifact_id=output_artifact_id,
+            expected_fingerprint=expected_fingerprint,
         )
 
     def is_node_cached(self, node: TaskNode) -> bool:
-        """Check if node output already exists in completed artifacts to guarantee idempotency."""
+        """Check if node output already exists in completed artifacts and matches expected fingerprint."""
         art_id = node.output_artifact_id or node.node_id
-        return art_id in self.completed_artifacts
+        if art_id not in self.completed_artifacts:
+            return False
+
+        if node.expected_fingerprint is not None:
+            cached_val = self.completed_artifacts[art_id]
+            # If cached value has fingerprint metadata, verify exact match
+            if isinstance(cached_val, dict) and "fingerprint" in cached_val:
+                match: bool = bool(cached_val["fingerprint"] == node.expected_fingerprint)
+                if not match:
+                    log.warning(
+                        "cache_fingerprint_mismatch",
+                        node_id=node.node_id,
+                        expected=node.expected_fingerprint,
+                        actual=cached_val["fingerprint"],
+                    )
+                return match
+            # If cached value is string matching the fingerprint directly
+            if isinstance(cached_val, str) and cached_val == node.expected_fingerprint:
+                return True
+            log.warning(
+                "cache_missing_fingerprint_metadata",
+                node_id=node.node_id,
+                expected=node.expected_fingerprint,
+            )
+            return False
+
+        return True
 
     def get_ready_nodes(self) -> list[TaskNode]:
         """Return nodes whose dependencies are all SUCCESS or SKIPPED_CACHED."""
@@ -160,6 +209,8 @@ class ConcurrencySafeScheduler:
                 node.result = result
                 node.status = TaskStatus.SUCCESS
                 art_id = node.output_artifact_id or node.node_id
+                if isinstance(result, dict) and "fingerprint" not in result and node.expected_fingerprint:
+                    result["fingerprint"] = node.expected_fingerprint
                 self.completed_artifacts[art_id] = result
                 self.execution_log.append({"node_id": node.node_id, "status": TaskStatus.SUCCESS})
                 return

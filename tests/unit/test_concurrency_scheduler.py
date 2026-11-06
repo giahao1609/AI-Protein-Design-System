@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-from protein_design.core.concurrency import ConcurrencySafeScheduler, TaskStatus
+from protein_design.core.concurrency import (
+    ConcurrencySafeScheduler,
+    TaskStatus,
+    calculate_task_fingerprint,
+)
 
 
 def test_scheduler_linear_pipeline_execution() -> None:
@@ -110,3 +114,44 @@ def test_scheduler_resume_idempotency_skips_cached_artifacts() -> None:
     assert results["step2"] == TaskStatus.SUCCESS
     assert not step1_ran  # Did not duplicate work
     assert step2_ran
+
+
+def test_scheduler_cache_fingerprint_matching_skips() -> None:
+    fp = calculate_task_fingerprint("input_seq", {"mode": "fast"}, "esmfold-v2")
+    completed_cache = {"step1": {"result": "cached_pdb", "fingerprint": fp}}
+    scheduler = ConcurrencySafeScheduler(max_concurrency=1, completed_artifacts=completed_cache)
+
+    ran = False
+
+    def task_step():
+        nonlocal ran
+        ran = True
+        return {"result": "new_pdb"}
+
+    scheduler.add_node("step1", task_step, expected_fingerprint=fp)
+    results = scheduler.run_all()
+
+    assert results["step1"] == TaskStatus.SKIPPED_CACHED
+    assert not ran
+
+
+def test_scheduler_cache_fingerprint_mismatch_invalidates() -> None:
+    old_fp = calculate_task_fingerprint("input_seq", {"mode": "fast"}, "esmfold-v1")
+    new_fp = calculate_task_fingerprint("input_seq", {"mode": "fast"}, "esmfold-v2")
+    completed_cache = {"step1": {"result": "stale_pdb", "fingerprint": old_fp}}
+    scheduler = ConcurrencySafeScheduler(max_concurrency=1, completed_artifacts=completed_cache)
+
+    ran = False
+
+    def task_step():
+        nonlocal ran
+        ran = True
+        return {"result": "new_pdb"}
+
+    # Register node expecting new_fp; old cached output should be rejected
+    scheduler.add_node("step1", task_step, expected_fingerprint=new_fp)
+    results = scheduler.run_all()
+
+    assert results["step1"] == TaskStatus.SUCCESS
+    assert ran
+    assert scheduler.completed_artifacts["step1"]["fingerprint"] == new_fp

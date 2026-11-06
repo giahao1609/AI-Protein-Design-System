@@ -10,6 +10,7 @@ Implements BaseGenerator for Tracks 1, 2, 3, 4, 6 (100–150 aa VHH single-domai
 
 from __future__ import annotations
 
+import hashlib
 import random
 from pathlib import Path
 from typing import Any
@@ -129,9 +130,15 @@ class VHHScaffoldGenerator(BaseGenerator):
         assay_ph = 6.0 if "EGFR" in target_name else 7.4
         nb35_cdrs = extract_vhh_cdrs(NANOBODY_35_SEQUENCE)
 
+        # Compute deterministic target salt using stable SHA-256 of target_id and generator version
+        target_salt = int(
+            hashlib.sha256(f"{target.target_id}:{self.version}".encode("utf-8")).hexdigest()[:8],
+            16,
+        )
+
         while len(candidates) < num_candidates and attempt < max_attempts:
             attempt += 1
-            cand_seed = seed + attempt
+            cand_seed = (seed + target_salt + attempt) % (2**31 - 1)
             cand_rng = random.Random(cand_seed)
 
             cdr1, cdr2, cdr3 = self._generate_cdr_loops(target, cand_rng)

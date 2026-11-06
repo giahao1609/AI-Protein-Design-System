@@ -18,27 +18,33 @@ import structlog
 
 from protein_design.core.exceptions import PredictionError
 from protein_design.predictors.base import BasePredictor, PredictionResult
-from protein_design.schemas import Candidate, Target
+from protein_design.schemas import Candidate, ScoreProvenance, Target
 
 log = structlog.get_logger(__name__)
 
 
 def compute_ipsae_score(
-    plddt: float,
-    interface_pae: float,
+    plddt: float | None,
+    interface_pae: float | None,
     interface_contacts: int = 15,
     masked_contacts_count: int = 0,
-) -> float:
+) -> float | None:
     """Compute ipSAE (interface predicted structural alignment error) composite score.
 
     Scale: 0.0 to 1.0 (higher = stronger predicted binding).
     Formula combines normalized interface PAE alignment confidence with mean pLDDT:
         ipSAE = (1.0 / (1.0 + (interface_pae / 10.0))) * (plddt / 100.0) * contact_factor
 
-    If contacts occurred on masked regions (e.g. signal peptides or disordered N/C-terminal
-    tails not present on mature protein), those contacts are deducted from mature interface calculation.
+    If required parameters are missing or no valid interface contacts exist,
+    returns None to avoid fabricating scientific binding metrics.
     """
+    if plddt is None or interface_pae is None:
+        return None
+
     valid_contacts = max(0, interface_contacts - masked_contacts_count)
+    if valid_contacts <= 0:
+        return 0.0
+
     normalized_plddt = max(0.0, min(100.0, plddt)) / 100.0
     alignment_conf = 1.0 / (1.0 + (max(0.0, interface_pae) / 10.0))
     contact_factor = min(1.0, max(0.2, valid_contacts / 10.0))
@@ -57,6 +63,7 @@ class ESMFold2_ipSAE_Scorer(BasePredictor):
         target_msa: bool = True,
         design_msa: bool = False,
         min_ipsae_threshold: float | None = None,
+        require_real_model: bool = False,
     ):
         self.num_seeds = num_seeds
         self.num_samples = num_samples
@@ -64,6 +71,7 @@ class ESMFold2_ipSAE_Scorer(BasePredictor):
         self.target_msa = target_msa
         self.design_msa = design_msa  # Strictly False per competition rules
         self.min_ipsae_threshold = min_ipsae_threshold
+        self.require_real_model = require_real_model
 
     @property
     def name(self) -> str:
@@ -85,6 +93,26 @@ class ESMFold2_ipSAE_Scorer(BasePredictor):
             raise PredictionError(
                 f"Simulated ESMFold2 predictor crash for {candidate.candidate_id}",
                 candidate_id=candidate.candidate_id,
+            )
+
+        require_real = config.get(
+            "require_real_model",
+            params.get("require_real_model", self.require_real_model),
+        )
+        if require_real:
+            # Under strict provenance gate, return explicit UNAVAILABLE instead of synthetic numbers
+            log.warning("real_esmfold_gpu_backend_unavailable", candidate_id=candidate.candidate_id)
+            return PredictionResult(
+                metrics={
+                    "ipsae_score": None,
+                    "score_status": "UNAVAILABLE",
+                    "reason": "GPU model inference offline; proxy estimation prohibited under strict provenance gate",
+                    "score_provenance": ScoreProvenance.UNVERIFIED.value,
+                    "is_model_predicted": False,
+                    "is_experimentally_validated": False,
+                },
+                confidence=None,
+                score_provenance=ScoreProvenance.UNVERIFIED.value,
             )
 
         # Deterministic pseudo-metrics based on sequence hash if real model is not dispatched
@@ -140,7 +168,7 @@ class ESMFold2_ipSAE_Scorer(BasePredictor):
         )
 
         min_thresh = params.get("min_ipsae_threshold") or self.min_ipsae_threshold
-        passed_filter = (ipsae_score >= min_thresh) if min_thresh is not None else True
+        passed_filter = (ipsae_score >= min_thresh) if (min_thresh is not None and ipsae_score is not None) else True
 
         metrics = {
             "esmfold_plddt": esmfold_plddt,
@@ -152,6 +180,9 @@ class ESMFold2_ipSAE_Scorer(BasePredictor):
             "ipsae_passed": passed_filter,
             "target_msa_used": self.target_msa,
             "design_msa_used": self.design_msa,
+            "score_provenance": ScoreProvenance.HEURISTIC_PROXY.value,
+            "is_model_predicted": False,
+            "is_experimentally_validated": False,
         }
 
         # Structure content
@@ -174,6 +205,7 @@ class ESMFold2_ipSAE_Scorer(BasePredictor):
             ipsae_score=ipsae_score,
             plddt=esmfold_plddt,
             passed=passed_filter,
+            provenance=ScoreProvenance.HEURISTIC_PROXY.value,
         )
 
         return PredictionResult(
@@ -181,4 +213,5 @@ class ESMFold2_ipSAE_Scorer(BasePredictor):
             structure_content=structure_content,
             complex_content=complex_content,
             confidence=ipsae_score,
+            score_provenance=ScoreProvenance.HEURISTIC_PROXY.value,
         )

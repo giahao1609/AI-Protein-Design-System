@@ -18,6 +18,7 @@ from protein_design.schemas.common import (
     QCResult,
     RunStatus,
     ScientificStatus,
+    ScoreProvenance,
     StatusTransition,
     generate_id,
     generate_sequential_id,
@@ -41,6 +42,7 @@ __all__ = [
     # Enums
     "CandidateStatus",
     "ScientificStatus",
+    "ScoreProvenance",
     "RunStatus",
     "EvidenceLevel",
     "DesignType",
