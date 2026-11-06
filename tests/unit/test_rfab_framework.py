@@ -76,8 +76,10 @@ def test_resolve_framework_from_cache(tmp_path: Path):
 
     # Should hit cache without making network requests
     with patch("urllib.request.urlopen") as mock_url:
-        result_path = loader.resolve_framework("h-NbBCII10")
-        assert result_path == cached_file
+        resolved = loader.resolve_framework("h-NbBCII10")
+        assert resolved.path == cached_file
+        assert resolved.status.value == "CACHED"
+        assert resolved.is_production_ready is True
         assert mock_url.call_count == 0
 
 
@@ -90,9 +92,11 @@ def test_resolve_framework_download_success(tmp_path: Path):
     mock_resp.__enter__.return_value = mock_resp
 
     with patch("urllib.request.urlopen", return_value=mock_resp):
-        result_path = loader.resolve_framework("h-NbBCII10")
-        assert result_path.exists()
-        assert "ATOM" in result_path.read_text(encoding="utf-8")
+        resolved = loader.resolve_framework("h-NbBCII10")
+        assert resolved.path.exists()
+        assert resolved.status.value == "VALID_DOWNLOADED"
+        assert resolved.is_production_ready is True
+        assert "ATOM" in resolved.path.read_text(encoding="utf-8")
 
 
 def test_resolve_framework_retry_and_mirror_fallback(tmp_path: Path):
@@ -107,8 +111,9 @@ def test_resolve_framework_retry_and_mirror_fallback(tmp_path: Path):
 
     # Primary fails twice, mirror succeeds
     with patch("urllib.request.urlopen", side_effect=[fail_resp, fail_resp, success_resp]):
-        result_path = loader.resolve_framework("h-NbBCII10")
-        assert result_path.exists()
+        resolved = loader.resolve_framework("h-NbBCII10")
+        assert resolved.path.exists()
+        assert resolved.status.value == "VALID_DOWNLOADED"
 
 
 def test_resolve_framework_offline_fallback(tmp_path: Path):
@@ -120,9 +125,11 @@ def test_resolve_framework_offline_fallback(tmp_path: Path):
     )
 
     with patch("urllib.request.urlopen", side_effect=urllib.error.URLError("Network down")):
-        result_path = loader.resolve_framework("h-NbBCII10")
-        assert result_path.exists()
-        assert "VHH FRAMEWORK" in result_path.read_text(encoding="utf-8")
+        resolved = loader.resolve_framework("h-NbBCII10")
+        assert resolved.path.exists()
+        assert resolved.status.value == "TEST_FIXTURE_FALLBACK"
+        assert resolved.is_production_ready is False
+        assert "VHH FRAMEWORK" in resolved.path.read_text(encoding="utf-8")
 
 
 def test_resolve_framework_offline_fallback_disabled_raises(tmp_path: Path):
@@ -154,3 +161,22 @@ def test_rfab_generator_generates_candidates(tmp_path: Path):
     assert len(candidates) == 3
     assert candidates[0].generator == "rfab"
     assert "framework_path" in candidates[0].metadata
+    assert candidates[0].metadata["framework_status"] == "TEST_FIXTURE_FALLBACK"
+    assert candidates[0].metadata["framework_production_ready"] is False
+    assert candidates[0].scientific_status.value == "GENERATED"
+
+
+def test_rfab_generator_enforce_production_rejects_mock_fallback(tmp_path: Path):
+    loader = RFabFrameworkLoader(cache_dir=tmp_path, allow_offline_fallback=True)
+    generator = RFabGenerator(framework_loader=loader)
+
+    target = Target(target_id="EGFR", name="EGFR", source="test", sequence="MKTVRQERLK")
+    with (
+        patch("urllib.request.urlopen", side_effect=urllib.error.URLError("Network down")),
+        pytest.raises(FrameworkDownloadError, match="Production enforcement rejected framework"),
+    ):
+        generator.generate(
+            target=target,
+            config={"framework_id": "h-NbBCII10", "enforce_production": True},
+            num_candidates=1,
+        )

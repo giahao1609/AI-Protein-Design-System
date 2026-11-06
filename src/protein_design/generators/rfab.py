@@ -12,6 +12,8 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -19,9 +21,30 @@ import structlog
 
 from protein_design.core.exceptions import GenerationError
 from protein_design.generators.base import BaseGenerator
-from protein_design.schemas import Candidate, Target
+from protein_design.schemas import Candidate, ScientificStatus, Target
 
 log = structlog.get_logger(__name__)
+
+
+class FrameworkStatus(str, Enum):
+    """Explicit classification states for antibody frameworks."""
+
+    VALID_DOWNLOADED = "VALID_DOWNLOADED"
+    CACHED = "CACHED"
+    TEST_FIXTURE_FALLBACK = "TEST_FIXTURE_FALLBACK"
+    UNAVAILABLE = "UNAVAILABLE"
+    REJECTED_INVALID = "REJECTED_INVALID"
+
+
+@dataclass
+class ResolvedFramework:
+    """Container for resolved antibody framework artifact with provenance metadata."""
+
+    path: Path
+    status: FrameworkStatus
+    framework_id: str
+    source_url: str | None = None
+    is_production_ready: bool = False
 
 
 class FrameworkResolutionError(GenerationError):
@@ -179,11 +202,12 @@ class RFabFrameworkLoader:
         self,
         framework_id_or_url: str,
         custom_cache_name: str | None = None,
-    ) -> Path:
+    ) -> ResolvedFramework:
         """Resolve a framework identifier or URL to a validated local PDB file.
 
         Checks local cache first. If not cached, attempts primary URL and fallback mirrors.
-        If all network calls fail and allow_offline_fallback is True, provisions fallback template.
+        If all network calls fail and allow_offline_fallback is True, provisions fallback template
+        with explicit TEST_FIXTURE_FALLBACK state, marking it as not production ready.
         """
         # 1. Determine cache file path
         if framework_id_or_url in CANONICAL_FRAMEWORK_REGISTRY:
@@ -204,7 +228,12 @@ class RFabFrameworkLoader:
                 cached_text = target_path.read_text(encoding="utf-8")
                 self.validate_pdb_content(cached_text, str(target_path))
                 log.info("framework_cache_hit", path=str(target_path))
-                return target_path
+                return ResolvedFramework(
+                    path=target_path,
+                    status=FrameworkStatus.CACHED,
+                    framework_id=framework_id_or_url,
+                    is_production_ready=True,
+                )
             except FrameworkValidationError:
                 log.warning("corrupted_cache_eviction", path=str(target_path))
                 target_path.unlink(missing_ok=True)
@@ -216,7 +245,13 @@ class RFabFrameworkLoader:
                 pdb_content = self._download_single_url(url)
                 target_path.write_text(pdb_content, encoding="utf-8")
                 log.info("framework_download_success", path=str(target_path), source_url=url)
-                return target_path
+                return ResolvedFramework(
+                    path=target_path,
+                    status=FrameworkStatus.VALID_DOWNLOADED,
+                    framework_id=framework_id_or_url,
+                    source_url=url,
+                    is_production_ready=True,
+                )
             except (FrameworkDownloadError, FrameworkValidationError, OSError) as exc:
                 download_errors.append(f"{url}: {exc}")
 
@@ -228,7 +263,12 @@ class RFabFrameworkLoader:
                 errors=download_errors,
             )
             target_path.write_text(MINIMAL_VHH_FRAMEWORK_PDB, encoding="utf-8")
-            return target_path
+            return ResolvedFramework(
+                path=target_path,
+                status=FrameworkStatus.TEST_FIXTURE_FALLBACK,
+                framework_id=framework_id_or_url,
+                is_production_ready=False,
+            )
 
         raise FrameworkDownloadError(
             f"Could not resolve framework '{framework_id_or_url}'. Download errors: {'; '.join(download_errors)}"
@@ -265,21 +305,40 @@ class RFabGenerator(BaseGenerator):
     ) -> list[Candidate]:
         """Generate candidate antibodies using resolved framework and RFab pipeline."""
         framework_id = config.get("framework_id", "h-NbBCII10")
-        framework_path = self._framework_loader.resolve_framework(framework_id)
+        enforce_production = config.get("enforce_production", False)
+
+        resolved = self._framework_loader.resolve_framework(framework_id)
+
+        # Strictly prevent minimal fallback fixtures from silently entering production pool
+        if enforce_production and not resolved.is_production_ready:
+            raise FrameworkDownloadError(
+                f"Production enforcement rejected framework '{framework_id}' with status "
+                f"'{resolved.status.value}'. Real validated 3D framework structure is required."
+            )
 
         candidates: list[Candidate] = []
-        # Mocked generation respecting framework path for offline / integration tests
         for i in range(1, num_candidates + 1):
             cid = f"rfab_{target.target_id.lower()}_{i:06d}"
             cand = Candidate(
                 candidate_id=cid,
                 target_id=target.target_id,
                 sequence="EVQLVESGGGLVQPGGSLRLSCAASGFTFSNYKMNWVRQAPGKGLEWVSDISQSGASISYTGSVKGRFTISRDNAKNTLYLQMNSLKPEDTAVYYCARWGQGTLVTVSS",
+                scientific_status=ScientificStatus.GENERATED,
                 generator=self.name,
                 generator_version=self.version,
-                metadata={"framework_path": str(framework_path), "framework_id": framework_id},
+                metadata={
+                    "framework_path": str(resolved.path),
+                    "framework_id": framework_id,
+                    "framework_status": resolved.status.value,
+                    "framework_production_ready": resolved.is_production_ready,
+                },
             )
             candidates.append(cand)
 
-        log.info("rfab_generation_completed", target_id=target.target_id, count=len(candidates))
+        log.info(
+            "rfab_generation_completed",
+            target_id=target.target_id,
+            count=len(candidates),
+            framework_status=resolved.status.value,
+        )
         return candidates
