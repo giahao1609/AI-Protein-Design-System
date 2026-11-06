@@ -175,6 +175,80 @@ def run_demo(
     db.close()
 
 
+# ---------------------------------------------------------------------------
+# run campaign (Changjiang Cup 2026)
+# ---------------------------------------------------------------------------
+
+@run_app.command("campaign")
+def run_campaign(
+    target: str = typer.Option("all", "--target", "-t", help="Target name/track (e.g. EGFR, 1, or 'all')"),
+    num_candidates: int = typer.Option(10, "--num", "-n", help="Number of candidates per track"),
+    mode: str = typer.Option("early_claim", "--mode", "-m", help="Submission mode: early_claim or final_optimal"),
+    output_dir: Path = typer.Option(Path("submissions"), "--output", "-o", help="Output directory"),
+    seed: int = typer.Option(42, "--seed", "-s", help="Random seed"),
+):
+    """Run Changjiang Cup 2026 campaign for one or all tracks."""
+    setup_logging()
+    from typing import Literal
+    from protein_design.core.campaign import CompetitionCampaignRunner
+
+    db = _get_db()
+    artifacts = _get_artifacts()
+    runner = CompetitionCampaignRunner(db=db, artifacts=artifacts)
+
+    targets_to_run: list[str] = []
+    if target.lower() == "all":
+        targets_to_run = ["egfr", "tnfa", "glp1r", "tfr1", "tl1a", "tnfr1", "il7ra"]
+    else:
+        targets_to_run = [target]
+
+    console.print("\n[bold green]== AI Protein Design System -- Changjiang Cup 2026 Campaign ==[/bold green]\n")
+    console.print(f"  Mode:        [cyan]{mode}[/cyan]")
+    console.print(f"  Candidates:  [cyan]{num_candidates}[/cyan] per track")
+    console.print(f"  Output:      [cyan]{output_dir}[/cyan]")
+    console.print(f"  Tracks:      [cyan]{', '.join(targets_to_run)}[/cyan]\n")
+
+    summary_table = Table(title="Campaign Execution Summary")
+    summary_table.add_column("Track", style="cyan")
+    summary_table.add_column("Engine", style="white")
+    summary_table.add_column("Molecule", style="magenta")
+    summary_table.add_column("Generated", style="yellow")
+    summary_table.add_column("Valid QC", style="green")
+    summary_table.add_column("Top Score (ipSAE)", style="bold green")
+
+    sub_mode: Literal["early_claim", "final_optimal"] = "final_optimal" if mode == "final_optimal" else "early_claim"
+
+    for t_id in targets_to_run:
+        console.print(f"Running track: [bold]{t_id.upper()}[/bold]...")
+        result = runner.run_track_campaign(
+            target_identifier=t_id,
+            num_candidates=num_candidates,
+            mode=sub_mode,
+            output_dir=output_dir,
+            seed=seed,
+        )
+        candidates = db.list_candidates(target_id=result["target_id"])
+        top_ipsae = "-"
+        if candidates:
+            scores = [float(c.metrics.get("ipsae_score", 0.0)) for c in candidates if c.status.value == "VALID"]
+            if scores:
+                top_ipsae = f"{max(scores):.4f}"
+
+        summary_table.add_row(
+            result["target_id"],
+            result["generator"],
+            result["molecule_type"],
+            str(result["total_generated"]),
+            str(result["valid_candidates"]),
+            top_ipsae,
+        )
+
+    console.print("\n")
+    console.print(summary_table)
+    console.print(f"\n[bold green]Campaign complete. Submissions exported to: {output_dir}[/bold green]\n")
+    db.close()
+
+
 @run_app.command("inspect")
 def run_inspect(
     run_id: str = typer.Argument(..., help="Experiment run ID"),

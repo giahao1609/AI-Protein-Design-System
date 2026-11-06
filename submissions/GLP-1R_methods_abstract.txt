@@ -1,0 +1,11 @@
+Methods Abstract for GLP-1R Binder Design (v1.0_early_claim):
+1. Target Preparation: Target sequence sliced strictly according to official UniProt
+annotations. Disordered terminal overhangs and signal peptides masked from scoring.
+2. De Novo Architecture: Candidates engineered de novo via generative pipelines
+(VHH, strictly within 100-150 aa). Zero template grafting.
+3. In Silico Confidence & ipSAE: Complex geometries evaluated via ESMFold2 under competition
+specs (1 seed, 1 sample, no templates; target MSA enabled, binder single-sequence mode).
+Candidates prioritized for high predicted interface confidence (ipSAE), broad sequence diversity,
+and favorable developability profiles for downstream experimental screening.
+4. Quality & Druggability: Sequences contain only 20 natural amino acids. Screened against
+purification tags, unpaired cysteines, N-glycosylation, charge imbalance, and degradation motifs.

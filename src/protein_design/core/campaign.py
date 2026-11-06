@@ -116,11 +116,17 @@ class CompetitionCampaignRunner:
             seed=seed,
         )
 
+        clean_tid = target.target_id.lower().replace("-", "").replace("_", "")
         valid_candidates: list[Candidate] = []
         pool_sequences: list[str] = []
 
         # 2. In Silico Scoring & QC Loop
         for cand in raw_candidates:
+            # Ensure candidate_id is uniquely scoped by target to avoid SQLite primary key overwrite
+            if not cand.candidate_id.startswith(f"{clean_tid}_"):
+                cand.candidate_id = f"{clean_tid}_{cand.candidate_id}"
+            cand.target_id = target.target_id
+
             # Predict complex geometry and ipSAE
             pred_result = self.scorer.predict(cand, target, {})
             cand.metrics.update(pred_result.metrics)
